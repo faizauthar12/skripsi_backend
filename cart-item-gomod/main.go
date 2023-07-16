@@ -3,6 +3,9 @@ package cartitem
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -146,4 +149,126 @@ func GetManyByUserUUID(
 	}
 
 	return cartItems, nil
+}
+
+func UpdateProductQuantity(
+	updateList []UpdateCandidate,
+	newProductQuantity int64,
+) ([]UpdateCandidate, error) {
+
+	if newProductQuantity < 0 {
+		return nil, errors.New("cart grand total cannot be blank")
+	}
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			cartItem:  CartItem{ProductQuantity: newProductQuantity},
+			objective: UPDATE_CART_ITEM_PRODUCT_QUANTITY,
+		},
+	)
+
+	return updateList, nil
+}
+
+func UpdateProducTotalPrice(
+	updateList []UpdateCandidate,
+	newProductTotalPrice int64,
+) ([]UpdateCandidate, error) {
+
+	if newProductTotalPrice < 0 {
+		return nil, errors.New("cart grand total cannot be blank")
+	}
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			cartItem:  CartItem{ProductQuantity: newProductTotalPrice},
+			objective: UPDATE_CART_ITEM_PRODUCT_TOTAL_PRICE,
+		},
+	)
+
+	return updateList, nil
+}
+
+func ExecUpdate(
+	client *mongo.Client,
+	updateList []UpdateCandidate,
+	customerUUID string,
+	cartUUID string,
+) error {
+
+	if cartUUID == "" {
+		return errors.New("product UUID cannot be blank")
+	}
+
+	if customerUUID == "" {
+		return errors.New("user UUID cannot be blank")
+	}
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			cart:      Cart{UpdatedAt: time.Now().Unix()},
+			objective: UPDATE_UPDATED_AT,
+		},
+	)
+
+	var setList bson.D
+	var unsetList bson.D
+
+	if len(updateList) > 0 {
+		for i := 0; i < len(updateList); i++ {
+			updateField := reflect.ValueOf(updateList[i].cart)
+
+			fieldName := strings.ToLower(updateField.Type().Field(updateList[i].objective).Name)
+			value := updateField.Field(updateList[i].objective).Interface()
+
+			if value == "" {
+				unsetList = append(unsetList, bson.E{fieldName, ""})
+			} else {
+				setList = append(setList, bson.E{fieldName, value})
+			}
+		}
+	}
+
+	coll := connect(client)
+
+	cart, cartExist, errorFindCart := Get(
+		client,
+		cartUUID,
+	)
+
+	if !cartExist {
+		if errorFindCart != nil {
+			return errorFindCart
+		} else {
+			return errors.New("product not found")
+		}
+	}
+
+	if cartUUID != cart.CustomerUUID { // Validate product ownership
+		return errors.New("cart uuid does not match")
+	}
+
+	var update bson.D
+
+	// conclusive
+	if len(unsetList) > 0 && len(setList) > 0 {
+		update = bson.D{{"$set", setList}, {"$unset", unsetList}}
+	} else if len(setList) > 0 {
+		update = bson.D{{"$set", setList}}
+	} else {
+		update = bson.D{{"$unset", unsetList}}
+	}
+
+	filterUpdate := bson.D{{Key: "uuid", Value: cartUUID}}
+
+	_, err := coll.UpdateOne(context.TODO(), filterUpdate, update)
+
+	if err != nil {
+		return errors.New("update cart failed")
+	}
+
+	return nil
 }
