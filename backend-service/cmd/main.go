@@ -4,10 +4,17 @@ import (
 	"context"
 	"time"
 
+	User "github.com/faizauthar12/skripsi/user-gomod"
+
 	"github.com/faizauthar12/skripsi/backend-service/controller"
+	"github.com/faizauthar12/skripsi/backend-service/middlewares"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+)
+
+var (
+	userInfo *User.User
 )
 
 const (
@@ -15,8 +22,9 @@ const (
 )
 
 type application struct {
-	user    *controller.UserController
-	product *controller.ProductController
+	user        *controller.UserController
+	product     *controller.ProductController
+	middlewares *middlewares.Middlewares
 }
 
 func connect() *mongo.Client {
@@ -40,8 +48,12 @@ func main() {
 	client := connect()
 
 	app := application{
-		user:    &controller.UserController{Client: client},
-		product: &controller.ProductController{Client: client},
+		user: &controller.UserController{Client: client},
+		product: &controller.ProductController{
+			Client:   client,
+			UserInfo: userInfo,
+		},
+		middlewares: &middlewares.Middlewares{UserInfo: userInfo},
 	}
 
 	route := app.routes()

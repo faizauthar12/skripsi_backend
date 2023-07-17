@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	Product "github.com/faizauthar12/skripsi/product-gomod"
+	User "github.com/faizauthar12/skripsi/user-gomod"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CreateProductHTTPBody struct {
-	UserUUID           string `json:"useruuid" binding:"required"`
 	ProductName        string `json:"productname" binding:"required"`
 	ProductDescription string `json:"productdesc" binding:"required"`
 	ProductCategory    string `json:"productcategory" binding:"required"`
@@ -19,7 +19,6 @@ type CreateProductHTTPBody struct {
 }
 
 type UpdateProductHTTPBody struct {
-	UserUUID           string `json:"useruuid"`
 	ProductName        string `json:"productname"`
 	ProductDescription string `json:"productdesc"`
 	ProductCategory    string `json:"productcategory"`
@@ -28,7 +27,8 @@ type UpdateProductHTTPBody struct {
 }
 
 type ProductController struct {
-	Client *mongo.Client
+	Client   *mongo.Client
+	UserInfo *User.User
 }
 
 func (controller *ProductController) CreateProduct(c *gin.Context) {
@@ -43,7 +43,7 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 	}
 	product, errorCreateProduct := Product.Create(
 		controller.Client,
-		createProductHTTPBody.UserUUID,
+		controller.UserInfo.UUID,
 		createProductHTTPBody.ProductName,
 		createProductHTTPBody.ProductDescription,
 		createProductHTTPBody.ProductCategory,
@@ -129,7 +129,7 @@ func (controller *ProductController) GetProduct(c *gin.Context) {
 	errorUpdateProduct := Product.ExecUpdate(
 		controller.Client,
 		updateList,
-		updateProductHTTPBody.UserUUID,
+		controller.UserInfo.UUID,
 		productUUID,
 	)
 
@@ -221,7 +221,7 @@ func (controller *ProductController) DeleteProduct(c *gin.Context) {
 
 	successResponse := gin.H{
 		"status":  200,
-		"message": SUCCESS_DELETE_PRODUCT,
+		"message": SUCCESS_DELETE_SERVICE,
 	}
 
 	c.JSON(http.StatusOK, successResponse)

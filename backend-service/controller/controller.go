@@ -16,6 +16,7 @@ const (
 	SUCCESS_UPDATE_USER    = "Successfully update user"
 	SUCCESS_CREATE_PRODUCT = "Successfully create product"
 	SUCCESS_UPDATE_PRODUCT = "Successfully update the product"
+	SUCCESS_DELETE_SERVICE = "Successfully delete the product"
 
 	USER_NOT_FOUND = "email or password not found"
 )
