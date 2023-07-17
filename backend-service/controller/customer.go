@@ -12,7 +12,7 @@ import (
 
 type CreateCustomerHTTPBody struct {
 	CustomerName        string `json:"customername"`
-	Customeremail       string `json:"customeremail"`
+	CustomerEmail       string `json:"customeremail"`
 	CustomerAddress     string `json:"customeraddress"`
 	CustomerPhoneNumber string `json:"phonenumber"`
 }
@@ -35,7 +35,7 @@ func (controller *CustomerController) CreateCustomer(c *gin.Context) {
 	customer, errorCreateCustomer := Customer.Create(
 		controller.Client,
 		createCustomerHTTPBody.CustomerName,
-		createCustomerHTTPBody.Customeremail,
+		createCustomerHTTPBody.CustomerEmail,
 		createCustomerHTTPBody.CustomerAddress,
 		createCustomerHTTPBody.CustomerPhoneNumber,
 	)
