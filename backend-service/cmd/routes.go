@@ -24,5 +24,12 @@ func (app *application) routes() *gin.Engine {
 		userRoutes.POST("/login", app.user.LoginUser)
 	}
 
+	productRoutes := route.Group("/product")
+	{
+		productRoutes.POST("/", app.product.CreateProduct)
+		productRoutes.GET("/:productUUID", app.product.GetProduct)
+		productRoutes.DELETE("/:productUUID", app.product.DeleteProduct)
+	}
+
 	return route
 }

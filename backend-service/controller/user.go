@@ -115,7 +115,11 @@ func (controller *UserController) LoginUser(c *gin.Context) {
 
 	client := controller.Client
 
-	logedUser, isAuthenticated := User.NativeAuthenticate(client, loginUserBodyRequest.Email, loginUserBodyRequest.Password)
+	logedUser, isAuthenticated := User.NativeAuthenticate(
+		client,
+		loginUserBodyRequest.Email,
+		loginUserBodyRequest.Password,
+	)
 
 	if !isAuthenticated {
 

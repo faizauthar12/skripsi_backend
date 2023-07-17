@@ -15,7 +15,8 @@ const (
 )
 
 type application struct {
-	user *controller.UserController
+	user    *controller.UserController
+	product *controller.ProductController
 }
 
 func connect() *mongo.Client {
@@ -39,7 +40,8 @@ func main() {
 	client := connect()
 
 	app := application{
-		user: &controller.UserController{Client: client},
+		user:    &controller.UserController{Client: client},
+		product: &controller.ProductController{Client: client},
 	}
 
 	route := app.routes()
