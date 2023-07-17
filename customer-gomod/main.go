@@ -54,19 +54,19 @@ func Create(
 	uuid := uuid.New().String()
 
 	if customerName == "" {
-		return Customer{}, errors.New("cannot be blank")
+		return Customer{}, errors.New("customer name cannot be blank")
 	}
 
 	if customerEmail == "" {
-		return Customer{}, errors.New("cannot be blank")
+		return Customer{}, errors.New("customer email cannot be blank")
 	}
 
 	if customerAddress == "" {
-		return Customer{}, errors.New("cannot be blank")
+		return Customer{}, errors.New("customer address cannot be blank")
 	}
 
 	if customerPhoneNumber == "" {
-		return Customer{}, errors.New("cannot be blank")
+		return Customer{}, errors.New("customer phone address cannot be blank")
 	}
 
 	customer := Customer{

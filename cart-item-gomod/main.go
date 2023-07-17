@@ -15,7 +15,7 @@ import (
 
 type CartItem struct {
 	UUID              string
-	CartUUID          string
+	CustomerUUID      string
 	ProductUUID       string
 	ProductQuantity   int64
 	ProductTotalPrice int64
@@ -43,9 +43,9 @@ func connect(client *mongo.Client) *mongo.Collection {
 	return client.Database(DATABASE).Collection(COLLECTION)
 }
 
-func create(
+func Create(
 	client *mongo.Client,
-	cartUUID string,
+	customerUUID string,
 	productUUID string,
 	productPrice int64,
 	productQuantity int64,
@@ -53,7 +53,7 @@ func create(
 
 	uuid := uuid.New().String()
 
-	if cartUUID == "" {
+	if customerUUID == "" {
 		return CartItem{}, errors.New("cart uuid cannot be blank")
 	}
 
@@ -69,7 +69,7 @@ func create(
 
 	cartItem := CartItem{
 		UUID:              uuid,
-		CartUUID:          cartUUID,
+		CustomerUUID:      customerUUID,
 		ProductUUID:       productUUID,
 		ProductQuantity:   productQuantity,
 		ProductTotalPrice: productTotalPrice,
@@ -109,16 +109,16 @@ func Get(
 	return findResult, true, nil
 }
 
-func GetManyByUserUUID(
+func GetManyByCustomerUUID(
 	client *mongo.Client,
-	cartUUID string,
+	customerUUID string,
 	numItems int64,
 	pages int64,
 ) ([]CartItem, error) {
 
 	coll := connect(client)
 
-	filter := bson.D{{Key: "cartuuid", Value: cartUUID}}
+	filter := bson.D{{Key: "customeruuid", Value: customerUUID}}
 	opts := options.Find().SetLimit(numItems).SetSkip((pages - 1) * numItems)
 
 	cursor, errorFindQuery := coll.Find(
@@ -195,10 +195,10 @@ func ExecUpdate(
 	client *mongo.Client,
 	updateList []UpdateCandidate,
 	customerUUID string,
-	cartUUID string,
+	cartItemUUID string,
 ) error {
 
-	if cartUUID == "" {
+	if cartItemUUID == "" {
 		return errors.New("product UUID cannot be blank")
 	}
 
@@ -209,8 +209,8 @@ func ExecUpdate(
 	updateList = append(
 		updateList,
 		UpdateCandidate{
-			cart:      Cart{UpdatedAt: time.Now().Unix()},
-			objective: UPDATE_UPDATED_AT,
+			cartItem:  CartItem{UpdatedAt: time.Now().Unix()},
+			objective: UPDATE_CART_ITEM_PRODUCT_UPDATED_AT,
 		},
 	)
 
@@ -219,7 +219,7 @@ func ExecUpdate(
 
 	if len(updateList) > 0 {
 		for i := 0; i < len(updateList); i++ {
-			updateField := reflect.ValueOf(updateList[i].cart)
+			updateField := reflect.ValueOf(updateList[i].cartItem)
 
 			fieldName := strings.ToLower(updateField.Type().Field(updateList[i].objective).Name)
 			value := updateField.Field(updateList[i].objective).Interface()
@@ -234,20 +234,20 @@ func ExecUpdate(
 
 	coll := connect(client)
 
-	cart, cartExist, errorFindCart := Get(
+	cart, cartItemExist, errorFindCartItem := Get(
 		client,
-		cartUUID,
+		cartItemUUID,
 	)
 
-	if !cartExist {
-		if errorFindCart != nil {
-			return errorFindCart
+	if !cartItemExist {
+		if errorFindCartItem != nil {
+			return errorFindCartItem
 		} else {
 			return errors.New("product not found")
 		}
 	}
 
-	if cartUUID != cart.CustomerUUID { // Validate product ownership
+	if cartItemUUID != cart.CustomerUUID { // Validate product ownership
 		return errors.New("cart uuid does not match")
 	}
 
@@ -262,7 +262,7 @@ func ExecUpdate(
 		update = bson.D{{"$unset", unsetList}}
 	}
 
-	filterUpdate := bson.D{{Key: "uuid", Value: cartUUID}}
+	filterUpdate := bson.D{{Key: "uuid", Value: cartItemUUID}}
 
 	_, err := coll.UpdateOne(context.TODO(), filterUpdate, update)
 

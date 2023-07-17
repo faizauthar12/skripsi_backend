@@ -58,7 +58,7 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
-			gin.H{"status": 500, "message": errorBodyRequest.Error()})
+			gin.H{"status": 400, "message": errorBodyRequest.Error()})
 		return
 	}
 
@@ -156,7 +156,7 @@ func (controller *ProductController) UpdateProduct(c *gin.Context) {
 
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
-			gin.H{"status": 500, "message": errorBodyRequest.Error()})
+			gin.H{"status": 400, "message": errorBodyRequest.Error()})
 		return
 	}
 

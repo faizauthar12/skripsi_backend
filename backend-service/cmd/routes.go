@@ -32,5 +32,15 @@ func (app *application) routes() *gin.Engine {
 		productRoutes.DELETE("/:productUUID", app.product.DeleteProduct)
 	}
 
+	customerRoutes := route.Group("/customer")
+	{
+		customerRoutes.POST("/", app.customer.CreateCustomer)
+	}
+
+	cartRoutes := route.Group("/cart")
+	{
+		cartRoutes.POST("/", app.cart.CreateCart)
+	}
+
 	return route
 }

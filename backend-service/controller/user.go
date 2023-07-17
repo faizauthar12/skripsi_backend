@@ -38,7 +38,7 @@ func (controller *UserController) CreateUser(c *gin.Context) {
 
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
-			gin.H{"status": 500, "message": errorBodyRequest.Error()})
+			gin.H{"status": 400, "message": errorBodyRequest.Error()})
 		return
 	}
 
@@ -109,7 +109,7 @@ func (controller *UserController) LoginUser(c *gin.Context) {
 
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
-			gin.H{"status": 500, "message": errorBodyRequest.Error()})
+			gin.H{"status": 400, "message": errorBodyRequest.Error()})
 		return
 	}
 
