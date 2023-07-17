@@ -54,6 +54,7 @@ func connect(client *mongo.Client) *mongo.Collection {
 func Create(
 	client *mongo.Client,
 	userUUID string,
+	userName string,
 	name string,
 	description string,
 	category string,
@@ -65,6 +66,10 @@ func Create(
 
 	if userUUID == "" {
 		return Product{}, errors.New("userUUID cannot be blank")
+	}
+
+	if userName == "" {
+		return Product{}, errors.New("user name cannot be blank")
 	}
 
 	if name == "" {
@@ -89,6 +94,8 @@ func Create(
 
 	product := Product{
 		UUID:               uuid,
+		UserUUID:           userUUID,
+		UserName:           userName,
 		ProductName:        name,
 		ProductDescription: description,
 		ProductCategory:    category,
@@ -132,7 +139,48 @@ func Get(
 	return findResult, true, nil
 }
 
-func GetManyByUserUUID(
+func GetMany(
+	client *mongo.Client,
+	numItems int64,
+	pages int64,
+) ([]Product, error) {
+
+	coll := connect(client)
+
+	filter := bson.D{{}}
+	opts := options.Find().SetLimit(numItems).SetSkip((pages - 1) * numItems)
+
+	cursor, errorFindQuery := coll.Find(
+		context.TODO(),
+		filter,
+		opts,
+	)
+
+	if errorFindQuery != nil {
+		if errorFindQuery == mongo.ErrNoDocuments {
+			return []Product{}, nil
+		}
+
+		return []Product{}, errorFindQuery
+	}
+
+	defer cursor.Close(context.TODO())
+
+	// Iterate over the result set and decode the documents into []product
+	var products []Product
+	for cursor.Next(context.TODO()) {
+		var product Product
+		errorDecode := cursor.Decode(&product)
+		if errorDecode != nil {
+			return nil, errorDecode
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}
+
+func GetManyByUserName(
 	client *mongo.Client,
 	userName string,
 	numItems int64,

@@ -3,9 +3,10 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
+	token "github.com/faizauthar12/skripsi/backend-service/utils"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
-	User "github.com/faizauthar12/skripsi/user-gomod"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,6 +19,10 @@ type CreateProductHTTPBody struct {
 	ProductStock       int64  `json:"stock" binding:"required"`
 }
 
+type GetProductHTTPBody struct {
+	UserName string `json:"username"`
+}
+
 type UpdateProductHTTPBody struct {
 	ProductName        string `json:"productname"`
 	ProductDescription string `json:"productdesc"`
@@ -27,14 +32,29 @@ type UpdateProductHTTPBody struct {
 }
 
 type ProductController struct {
-	Client   *mongo.Client
-	UserInfo *User.User
+	Client *mongo.Client
 }
 
 func (controller *ProductController) CreateProduct(c *gin.Context) {
 
 	var createProductHTTPBody CreateProductHTTPBody
 	errorBodyRequest := c.BindJSON(&createProductHTTPBody)
+
+	user, errorExtractToken := token.ExtractToken(c)
+
+	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
 
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
@@ -43,7 +63,8 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 	}
 	product, errorCreateProduct := Product.Create(
 		controller.Client,
-		controller.UserInfo.UUID,
+		user.UUID,
+		user.Name,
 		createProductHTTPBody.ProductName,
 		createProductHTTPBody.ProductDescription,
 		createProductHTTPBody.ProductCategory,
@@ -76,9 +97,58 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *ProductController) GetProduct(c *gin.Context) {
+func (controller *ProductController) GetMany(c *gin.Context) {
+
+	// UserName := c.Query("userName")
+	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
+	pages, errorParsingPages := strconv.ParseInt(c.Query("pages"), 10, 64)
+
+	if errorParsingNumItems != nil {
+		numItems = DEFAULT_NUM_ITEMS
+	}
+
+	if errorParsingPages != nil {
+		pages = DEFAULT_PAGES
+	}
+
+	Products, errorGetProducts := Product.GetMany(
+		controller.Client,
+		numItems,
+		pages,
+	)
+
+	if errorGetProducts != nil {
+
+		fmt.Println("GetManyBookings() ERR: ", errorGetProducts.Error())
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+			},
+		)
+
+		return
+	}
+
+	successResponse := gin.H{
+		"status":  200,
+		"message": SUCCESS_GET_PRODUCT,
+		"data": gin.H{
+			"products": Products,
+		},
+		"numItems": numItems,
+		"pages":    pages,
+	}
+
+	c.JSON(http.StatusOK, successResponse)
+}
+
+func (controller *ProductController) UpdateProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
+
+	user, _ := token.ExtractToken(c)
 
 	var updateProductHTTPBody UpdateProductHTTPBody
 	errorBodyRequest := c.BindJSON(&updateProductHTTPBody)
@@ -129,7 +199,7 @@ func (controller *ProductController) GetProduct(c *gin.Context) {
 	errorUpdateProduct := Product.ExecUpdate(
 		controller.Client,
 		updateList,
-		controller.UserInfo.UUID,
+		user.UUID,
 		productUUID,
 	)
 
@@ -198,9 +268,25 @@ func (controller *ProductController) DeleteProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
+	user, errorExtractToken := token.ExtractToken(c)
+
+	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
 	_, errorDeleteProduct := Product.Delete(
 		controller.Client,
-		"asdasd",
+		user.UUID,
 		productUUID,
 	)
 
