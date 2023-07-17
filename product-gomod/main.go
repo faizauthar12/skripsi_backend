@@ -35,6 +35,9 @@ const (
 	DATABASE   = "skripsi"
 	COLLECTION = "product"
 
+	UUID_DOESNT_MATCH = "Product: Unauthorized Update: UserUUID doesn't match"
+	PRODUCT_NOT_FOUND = "Product: Product not found"
+
 	UPDATE_USER_NAME           = 2
 	UPDATE_PRODUCT_NAME        = 3
 	UPDATE_PRODUCT_DESCRIPTION = 4
@@ -323,12 +326,12 @@ func ExecUpdate(
 		if errorFindProduct != nil {
 			return errorFindProduct
 		} else {
-			return errors.New("product not found")
+			return errors.New(PRODUCT_NOT_FOUND)
 		}
 	}
 
 	if productUUID != product.UserUUID { // Validate product ownership
-		return errors.New("product uuid does not match")
+		return errors.New(UUID_DOESNT_MATCH)
 	}
 
 	var update bson.D
@@ -369,12 +372,12 @@ func Delete(
 		filter).Decode(&findResult)
 
 	if findQueryError != nil {
-		return false, errors.New("product not found")
+		return false, errors.New(PRODUCT_NOT_FOUND)
 	}
 
 	// Validate product ownership
 	if userUUID != findResult.UserUUID {
-		return false, errors.New("uuid does not match")
+		return false, errors.New(UUID_DOESNT_MATCH)
 	}
 
 	_, errorDelete := coll.DeleteOne(context.TODO(), filter)
