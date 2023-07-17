@@ -37,9 +37,6 @@ type ProductController struct {
 
 func (controller *ProductController) CreateProduct(c *gin.Context) {
 
-	var createProductHTTPBody CreateProductHTTPBody
-	errorBodyRequest := c.BindJSON(&createProductHTTPBody)
-
 	user, errorExtractToken := token.ExtractToken(c)
 
 	if errorExtractToken != nil {
@@ -56,11 +53,15 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 		return
 	}
 
+	var createProductHTTPBody CreateProductHTTPBody
+	errorBodyRequest := c.BindJSON(&createProductHTTPBody)
+
 	if errorBodyRequest != nil {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"status": 500, "message": errorBodyRequest.Error()})
 		return
 	}
+
 	product, errorCreateProduct := Product.Create(
 		controller.Client,
 		user.UUID,
