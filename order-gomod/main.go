@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/faizauthar12/skripsi/order-gomod/api"
@@ -51,6 +52,9 @@ const (
 
 	DATABASE   = "skripsi"
 	COLLECTION = "order"
+
+	privateKey     = "ba14af7741b3ef0405d257178aebeb9294fb930d8a8c98838ee51e9d90cfaa7e"
+	accountAddress = "0x48b72f934CEC5db96bc69f2aa5d7C4bff498D8e1"
 )
 
 func connect(client *mongo.Client) *mongo.Collection {
@@ -166,10 +170,7 @@ func getAccountAuth(ethClient *ethclient.Client, privateKeyAddress string) *bind
 	return auth
 }
 
-const privateKey = "69f5d51743cb8451258fa506b16f0c70dab6473477afa85c3f0ddf7bbe7ede0e"
-const accountAddress = "0x184987B87f7fDe80Ca9eF42911AAF6F4D9BE0537"
-
-func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts) {
+func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts) (*types.Transaction, error) {
 	var productUUID []string
 	var productQuantity []int64
 	var productTotalPrice []int64
@@ -179,7 +180,7 @@ func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts
 		productTotalPrice = append(productTotalPrice, item.ProductTotalPrice)
 	}
 
-	tx, errorStoringData := orderContract.StoreOrder(
+	tx, errorStoringData := orderContract.SetOrder(
 		auth,
 		order.UUID,
 		productUUID,
@@ -195,57 +196,37 @@ func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts
 	)
 
 	if errorStoringData != nil {
-		panic(errorStoringData)
+		return &types.Transaction{}, nil
 	}
 
-	fmt.Printf("tx sent: %s\n", tx.Hash().Hex())
+	return tx, nil
 
 }
 
-func ReadDataFromEth(orderContract *api.Api, auth *bind.TransactOpts) {
-	// readData, errorReadData := connectionEthereum.OrderInstance(
-	// 	&bind.CallOpts{
-	// 		Pending:     false,
-	// 		From:        auth.From,
-	// 		BlockNumber: auth.Nonce,
-	// 		Context:     context.TODO(),
-	// 	},
-	// )
+func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.TransactOpts, orderUUID string) {
 
-	// if errorReadData != nil {
-	// 	panic(errorReadData)
-	// }
+	fmt.Println("Read: From: ", auth.From)
+	fmt.Println("Read: Nonce: ", auth.Nonce)
 
-	// retrivedOrder := Order{
-	// 	UUID:                readData.UUID,
-	// 	CartGrandTotal:      readData.CartGrandTotal,
-	// 	CustomerUUID:        readData.CustomerUUID,
-	// 	CustomerName:        readData.CustomerName,
-	// 	CustomerEmail:       readData.CustomerEmail,
-	// 	CustomerAddress:     readData.CustomerAddress,
-	// 	CustomerPhoneNumber: readData.CustomerPhoneNumber,
-	// 	Status:              readData.Status,
-	// }
-
-	// fmt.Println(retrivedOrder)
-
-	// fmt.Println("Read: From: ", auth.From)
-	// fmt.Println("Read: Nonce: ", auth.Nonce)
-
-	opts := &bind.CallOpts{
-		Pending:     false,
-		From:        auth.From,
-		BlockNumber: auth.Nonce,
-		Context:     context.TODO(),
-	}
-
-	result, errorResult := orderContract.OrderInstance(opts)
+	result, errorResult := orderContract.GetOrder(&bind.CallOpts{}, orderUUID)
 
 	if errorResult != nil {
 		panic(errorResult)
 	}
 
-	fmt.Println(result)
+	retrivedOrder := Order{
+		UUID:                result.OrderUUID,
+		CartGrandTotal:      result.CartGrandTotal,
+		CustomerUUID:        result.CustomerUUID,
+		CustomerName:        result.CustomerName,
+		CustomerEmail:       result.CustomerEmail,
+		CustomerAddress:     result.CustomerAddress,
+		CustomerPhoneNumber: result.CustomerPhoneNumber,
+		Status:              result.Status,
+	}
+
+	fmt.Println("Read: Result: ", result)
+	fmt.Println("Read: retrievedOrder: ", retrivedOrder)
 }
 
 func connectMongo() *mongo.Client {
@@ -290,27 +271,26 @@ func main() {
 		panic(errorCreateOrder)
 	}
 
-	ethClient, errorConnectEthereum := ethclient.Dial("HTTP://127.0.0.1:7545")
+	ethClient, errorConnectEthereum := ethclient.Dial("HTTP://127.0.0.1:8545")
 	if errorConnectEthereum != nil {
 		panic(errorConnectEthereum)
 	}
 
 	auth := getAccountAuth(ethClient, privateKey)
 
-	// address, tx, instance, errorDeploy := api.DeployApi(auth, ethClient)
-	// if errorDeploy != nil {
-	// 	panic(errorDeploy)
-	// }
+	address, tx, instance, errorDeploy := api.DeployApi(auth, ethClient)
+	if errorDeploy != nil {
+		panic(errorDeploy)
+	}
 
-	// fmt.Println(address.Hex())
-	// _, _ = instance, tx
-	// fmt.Println("instance->", instance)
-	// fmt.Println("tx->", tx.Hash().Hex())
+	fmt.Println("main: address->", address.Hex())
 
-	commonAddress := common.HexToAddress(accountAddress)
+	_, _ = instance, tx
+	fmt.Println("main: instance->", instance)
+	fmt.Println("main: tx->", tx.Hash().Hex())
 
 	orderContract, errorConnectEth := api.NewApi(
-		commonAddress,
+		common.HexToAddress(address.Hex()),
 		ethClient,
 	)
 
@@ -318,15 +298,20 @@ func main() {
 		panic(errorConnectEth)
 	}
 
-	balancedAt, errorGetBalance := ethClient.BalanceAt(context.TODO(), commonAddress, nil)
+	balancedAt, errorGetBalance := ethClient.BalanceAt(context.TODO(), common.HexToAddress(address.Hex()), nil)
 
 	if errorGetBalance != nil {
 		panic(errorGetBalance)
 	}
 
-	fmt.Println(balancedAt)
+	fmt.Println("main: balancedAt: ", balancedAt)
 
-	StoreDataToEth(order, orderContract, auth)
+	tx, errorStoreData := StoreDataToEth(order, orderContract, auth)
+	if errorStoreData != nil {
+		panic(errorStoreData)
+	}
 
-	// ReadDataFromEth(orderContract, auth)
+	fmt.Println("main: tx of stored data: ", tx)
+
+	ReadDataFromEth(common.HexToAddress(address.Hex()), orderContract, auth, order.UUID)
 }
