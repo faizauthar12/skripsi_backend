@@ -133,8 +133,46 @@ func Create(
 	return order, nil
 }
 
+func DeployApi(auth *bind.TransactOpts, ethClient *ethclient.Client) (common.Address, error) {
+
+	address, tx, instance, errorDeploy := api.DeployApi(auth, ethClient)
+	if errorDeploy != nil {
+		return common.Address{}, errorDeploy
+	}
+
+	fmt.Println("DeployApi: address->", address.Hex())
+	fmt.Println("DeployApi: instance->", instance)
+	fmt.Println("DeployApi: tx->", tx.Hash().Hex())
+
+	return address, nil
+}
+
+func NewApi(address common.Address, ethClient *ethclient.Client) (*api.Api, error) {
+	orderContract, errorConnectEth := api.NewApi(
+		common.HexToAddress(address.Hex()),
+		ethClient,
+	)
+
+	if errorConnectEth != nil {
+		return nil, errorConnectEth
+	}
+
+	return orderContract, nil
+}
+
+func CheckBalance(ethClient *ethclient.Client, address common.Address) (*big.Int, error) {
+	balancedAt, errorGetBalance := ethClient.BalanceAt(context.TODO(), common.HexToAddress(address.Hex()), nil)
+
+	if errorGetBalance != nil {
+		return nil, errorGetBalance
+	}
+
+	fmt.Println("CheckBalance: balancedAt: ", balancedAt)
+	return balancedAt, nil
+}
+
 // function to create auth for any account from its private key
-func getAccountAuth(ethClient *ethclient.Client, privateKeyAddress string) *bind.TransactOpts {
+func GetAccountAuth(ethClient *ethclient.Client, privateKeyAddress string) *bind.TransactOpts {
 
 	privateKey, errorGetPrivateGet := crypto.HexToECDSA(privateKeyAddress)
 	if errorGetPrivateGet != nil {

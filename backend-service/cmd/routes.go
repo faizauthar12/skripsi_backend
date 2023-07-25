@@ -20,7 +20,6 @@ func (app *application) routes() *gin.Engine {
 	{
 		userRoutes.POST("/", app.user.CreateUser)
 		userRoutes.PATCH("/", app.user.UpdateUser)
-
 		userRoutes.POST("/login", app.user.LoginUser)
 	}
 
@@ -40,6 +39,11 @@ func (app *application) routes() *gin.Engine {
 	cartRoutes := route.Group("/cart")
 	{
 		cartRoutes.POST("/", app.cart.CreateCart)
+	}
+
+	orderRoutes := route.Group("/order")
+	{
+		orderRoutes.POST("/", app.order.CreateOrder)
 	}
 
 	return route
