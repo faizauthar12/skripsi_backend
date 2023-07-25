@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,14 +16,14 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/faizauthar12/skripsi/order-gomod/api"
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Order struct {
-	UUID                string
+	ID                  int64 // Auto-incremented ID
 	CartItem            []CartItem
 	CartGrandTotal      int64
 	CustomerUUID        string
@@ -39,6 +40,11 @@ type CartItem struct {
 	ProductTotalPrice int64
 }
 
+type IDGenerator struct {
+	ID   string `bson:"_id"`
+	Next int64  `bson:"next"`
+}
+
 const (
 	CART_ITEM_CANNOT_BLANK             = "cart item cannot be blank"
 	CART_GRAND_TOTAL_CANNOT_BLANK      = "cart grand total cannot be blank"
@@ -53,8 +59,7 @@ const (
 	DATABASE   = "skripsi"
 	COLLECTION = "order"
 
-	privateKey     = "ba14af7741b3ef0405d257178aebeb9294fb930d8a8c98838ee51e9d90cfaa7e"
-	accountAddress = "0x48b72f934CEC5db96bc69f2aa5d7C4bff498D8e1"
+	privateKey = "8675ae8a067522d06bc7c78e6e84c945fb70329042bd04d86ec38a05de372008"
 )
 
 func connect(client *mongo.Client) *mongo.Collection {
@@ -71,8 +76,6 @@ func Create(
 	customerAddress string,
 	customerPhoneNumber string,
 ) (Order, error) {
-
-	uuid := uuid.New().String()
 
 	if cartItem == nil {
 		return Order{}, errors.New(CART_ITEM_CANNOT_BLANK)
@@ -98,8 +101,18 @@ func Create(
 		return Order{}, errors.New(CUSTOMER_PHONE_NUMBER_CANNOT_BLANK)
 	}
 
+	// Obtain the next available ID from the IDGenerator collection
+	idGenColl := connect(client)
+	update := bson.D{{"$inc", bson.D{{"next", 1}}}}
+	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
+	var idDoc IDGenerator
+	errorGenColl := idGenColl.FindOneAndUpdate(context.TODO(), bson.D{}, update, opts).Decode(&idDoc)
+	if errorGenColl != nil {
+		return Order{}, errors.New(ERROR_CREATING_DB)
+	}
+
 	order := Order{
-		UUID:                uuid,
+		ID:                  idDoc.Next,
 		CartItem:            cartItem,
 		CartGrandTotal:      cartGrandTotal,
 		CustomerUUID:        customerUUID,
@@ -182,7 +195,7 @@ func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts
 
 	tx, errorStoringData := orderContract.SetOrder(
 		auth,
-		order.UUID,
+		string(order.ID),
 		productUUID,
 		productQuantity,
 		productTotalPrice,
@@ -214,8 +227,10 @@ func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.
 		panic(errorResult)
 	}
 
+	id, _ := strconv.ParseInt(result.OrderID, 10, 64)
+
 	retrivedOrder := Order{
-		UUID:                result.OrderUUID,
+		ID:                  id,
 		CartGrandTotal:      result.CartGrandTotal,
 		CustomerUUID:        result.CustomerUUID,
 		CustomerName:        result.CustomerName,
@@ -313,5 +328,5 @@ func main() {
 
 	fmt.Println("main: tx of stored data: ", tx)
 
-	ReadDataFromEth(common.HexToAddress(address.Hex()), orderContract, auth, order.UUID)
+	ReadDataFromEth(common.HexToAddress(address.Hex()), orderContract, auth, string(rune(order.ID)))
 }

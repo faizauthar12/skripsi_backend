@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract OrderContract {
     struct Order {
-        string OrderUUID;
+        string OrderID;
         string[] ProductUUID;
         int64[] ProductQuantity;
         int64[] ProductTotalPrice;
@@ -17,12 +17,12 @@ contract OrderContract {
     }
 
     mapping(uint256 => Order) private orders;
-    mapping(string => uint256) private orderIndexes; // Mapping order UUID to its index
+    mapping(string => uint256) private orderIndexes; // Mapping order ID to its index
     uint256 private orderCount;
 
     // Setter function for creating or updating an order
     function setOrder(
-        string memory _orderUUID,
+        string memory _orderID,
         string[] memory _productUUID,
         int64[] memory _productQuantity,
         int64[] memory _productTotalPrice,
@@ -35,7 +35,7 @@ contract OrderContract {
         string memory _status
     ) public {
         orders[orderCount] = Order(
-            _orderUUID,
+            _orderID,
             _productUUID,
             _productQuantity,
             _productTotalPrice,
@@ -48,16 +48,16 @@ contract OrderContract {
             _status
         );
 
-        orderIndexes[_orderUUID] = orderCount; // Update mapping for order UUID to its index
+        orderIndexes[_orderID] = orderCount; // Update mapping for order ID to its index
         orderCount++;
     }
 
-    // Getter function to retrieve an order by its UUID
+    // Getter function to retrieve an order by its ID
     function getOrder(
-        string memory orderUUID
+        string memory orderID
     ) public view returns (Order memory) {
-        uint256 index = orderIndexes[orderUUID];
-        require(index < orderCount, "Invalid order UUID");
+        uint256 index = orderIndexes[orderID];
+        require(index < orderCount, "Invalid order ID");
         return orders[index];
     }
 
