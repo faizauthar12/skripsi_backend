@@ -1,4 +1,4 @@
-package main
+package order
 
 import (
 	"context"
@@ -260,73 +260,73 @@ func connectMongo() *mongo.Client {
 	return client
 }
 
-func main() {
+// func main() {
 
-	cartItem := CartItem{
-		ProductUUID:       "asdasdasd",
-		ProductQuantity:   2,
-		ProductTotalPrice: 24000000,
-	}
+// 	cartItem := CartItem{
+// 		ProductUUID:       "asdasdasd",
+// 		ProductQuantity:   2,
+// 		ProductTotalPrice: 24000000,
+// 	}
 
-	// mongodb
-	clientMongo := connectMongo()
+// 	// mongodb
+// 	clientMongo := connectMongo()
 
-	order, errorCreateOrder := Create(
-		clientMongo,
-		[]CartItem{cartItem},
-		24000000,
-		"asdasdasdasd",
-		"faiz",
-		"faiz@gmail.com",
-		"disini sana sini",
-		"085155054855",
-	)
+// 	order, errorCreateOrder := Create(
+// 		clientMongo,
+// 		[]CartItem{cartItem},
+// 		24000000,
+// 		"asdasdasdasd",
+// 		"faiz",
+// 		"faiz@gmail.com",
+// 		"disini sana sini",
+// 		"085155054855",
+// 	)
 
-	if errorCreateOrder != nil {
-		panic(errorCreateOrder)
-	}
+// 	if errorCreateOrder != nil {
+// 		panic(errorCreateOrder)
+// 	}
 
-	ethClient, errorConnectEthereum := ethclient.Dial("HTTP://127.0.0.1:8545")
-	if errorConnectEthereum != nil {
-		panic(errorConnectEthereum)
-	}
+// 	ethClient, errorConnectEthereum := ethclient.Dial("HTTP://127.0.0.1:8545")
+// 	if errorConnectEthereum != nil {
+// 		panic(errorConnectEthereum)
+// 	}
 
-	auth := getAccountAuth(ethClient, privateKey)
+// 	auth := getAccountAuth(ethClient, privateKey)
 
-	address, tx, instance, errorDeploy := api.DeployApi(auth, ethClient)
-	if errorDeploy != nil {
-		panic(errorDeploy)
-	}
+// 	address, tx, instance, errorDeploy := api.DeployApi(auth, ethClient)
+// 	if errorDeploy != nil {
+// 		panic(errorDeploy)
+// 	}
 
-	fmt.Println("main: address->", address.Hex())
+// 	fmt.Println("main: address->", address.Hex())
 
-	_, _ = instance, tx
-	fmt.Println("main: instance->", instance)
-	fmt.Println("main: tx->", tx.Hash().Hex())
+// 	_, _ = instance, tx
+// 	fmt.Println("main: instance->", instance)
+// 	fmt.Println("main: tx->", tx.Hash().Hex())
 
-	orderContract, errorConnectEth := api.NewApi(
-		common.HexToAddress(address.Hex()),
-		ethClient,
-	)
+// 	orderContract, errorConnectEth := api.NewApi(
+// 		common.HexToAddress(address.Hex()),
+// 		ethClient,
+// 	)
 
-	if errorConnectEth != nil {
-		panic(errorConnectEth)
-	}
+// 	if errorConnectEth != nil {
+// 		panic(errorConnectEth)
+// 	}
 
-	balancedAt, errorGetBalance := ethClient.BalanceAt(context.TODO(), common.HexToAddress(address.Hex()), nil)
+// 	balancedAt, errorGetBalance := ethClient.BalanceAt(context.TODO(), common.HexToAddress(address.Hex()), nil)
 
-	if errorGetBalance != nil {
-		panic(errorGetBalance)
-	}
+// 	if errorGetBalance != nil {
+// 		panic(errorGetBalance)
+// 	}
 
-	fmt.Println("main: balancedAt: ", balancedAt)
+// 	fmt.Println("main: balancedAt: ", balancedAt)
 
-	tx, errorStoreData := StoreDataToEth(order, orderContract, auth)
-	if errorStoreData != nil {
-		panic(errorStoreData)
-	}
+// 	tx, errorStoreData := StoreDataToEth(order, orderContract, auth)
+// 	if errorStoreData != nil {
+// 		panic(errorStoreData)
+// 	}
 
-	fmt.Println("main: tx of stored data: ", tx)
+// 	fmt.Println("main: tx of stored data: ", tx)
 
-	ReadDataFromEth(common.HexToAddress(address.Hex()), orderContract, auth, string(rune(order.ID)))
-}
+// 	ReadDataFromEth(common.HexToAddress(address.Hex()), orderContract, auth, string(rune(order.ID)))
+// }
