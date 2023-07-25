@@ -102,7 +102,7 @@ func Create(
 	}
 
 	// Obtain the next available ID from the IDGenerator collection
-	idGenColl := connect(client)
+	idGenColl := client.Database(DATABASE).Collection("orderID")
 	update := bson.D{{"$inc", bson.D{{"next", 1}}}}
 	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
 	var idDoc IDGenerator
