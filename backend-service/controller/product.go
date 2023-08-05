@@ -103,6 +103,7 @@ func (controller *ProductController) GetMany(c *gin.Context) {
 	// UserName := c.Query("userName")
 	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
 	pages, errorParsingPages := strconv.ParseInt(c.Query("pages"), 10, 64)
+	category := c.Query("category")
 
 	if errorParsingNumItems != nil {
 		numItems = DEFAULT_NUM_ITEMS
@@ -114,6 +115,7 @@ func (controller *ProductController) GetMany(c *gin.Context) {
 
 	Products, errorGetProducts := Product.GetMany(
 		controller.Client,
+		category,
 		numItems,
 		pages,
 	)

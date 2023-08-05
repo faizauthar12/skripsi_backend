@@ -141,13 +141,19 @@ func Get(
 
 func GetMany(
 	client *mongo.Client,
+	category string,
 	numItems int64,
 	pages int64,
 ) ([]Product, error) {
 
 	coll := connect(client)
 
-	filter := bson.D{{}}
+	var filter bson.D
+	if category != "" {
+		filter = bson.D{{Key: "productcategory", Value: category}}
+	} else {
+		filter = bson.D{}
+	}
 	opts := options.Find().SetLimit(numItems).SetSkip((pages - 1) * numItems)
 
 	cursor, errorFindQuery := coll.Find(
