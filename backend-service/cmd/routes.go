@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,8 @@ func (app *application) routes() *gin.Engine {
 			"message": "Hello world",
 		})
 	})
+
+	route.Use(cors.Default())
 
 	userRoutes := route.Group("/user")
 	{
