@@ -56,7 +56,7 @@ func (controller *CustomerController) CreateCustomer(c *gin.Context) {
 
 	successResponse := gin.H{
 		"status":  200,
-		"message": SUCCESS_CREATE_PRODUCT,
+		"message": SUCCESS_CREATE_CUSTOMER,
 		"data": gin.H{
 			"customer": customer,
 		},

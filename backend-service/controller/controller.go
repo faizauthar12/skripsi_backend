@@ -17,14 +17,16 @@ const (
 
 	UNAUTHORIZED = "Unauthorized"
 
-	SUCCESS_CREATE_USER    = "Successfully create user"
-	SUCCESS_LOGIN_USER     = "Successfully logged in"
-	SUCCESS_UPDATE_USER    = "Successfully update user"
-	SUCCESS_CREATE_PRODUCT = "Successfully create product"
-	SUCCESS_UPDATE_PRODUCT = "Successfully update the product"
-	SUCCESS_DELETE_SERVICE = "Successfully delete the product"
-	SUCCESS_GET_PRODUCT    = "Successfully get product"
-	SUCCESS_CREATE_CART    = "Successfully create cart"
+	SUCCESS_CREATE_USER     = "Successfully create user"
+	SUCCESS_LOGIN_USER      = "Successfully logged in"
+	SUCCESS_UPDATE_USER     = "Successfully update user"
+	SUCCESS_CREATE_PRODUCT  = "Successfully create product"
+	SUCCESS_UPDATE_PRODUCT  = "Successfully update the product"
+	SUCCESS_DELETE_SERVICE  = "Successfully delete the product"
+	SUCCESS_GET_PRODUCT     = "Successfully get product"
+	SUCCESS_CREATE_CART     = "Successfully create cart"
+	SUCCESS_CREATE_CUSTOMER = "Successfully create customer"
+	SUCCESS_CREATE_ORDER    = "Successfully create order"
 
 	USER_NOT_FOUND = "email or password not found"
 )
