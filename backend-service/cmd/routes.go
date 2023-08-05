@@ -29,6 +29,7 @@ func (app *application) routes() *gin.Engine {
 	productRoutes := route.Group("/product")
 	{
 		productRoutes.GET("/", app.product.GetMany)
+		productRoutes.GET("/:productUUID", app.product.Get)
 		productRoutes.POST("/", app.product.CreateProduct)
 		productRoutes.PATCH("/:productUUID", app.product.UpdateProduct)
 		productRoutes.DELETE("/:productUUID", app.product.DeleteProduct)

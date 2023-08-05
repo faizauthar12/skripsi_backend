@@ -147,6 +147,40 @@ func (controller *ProductController) GetMany(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
+func (controller *ProductController) Get(c *gin.Context) {
+
+	productUUID := c.Param("productUUID")
+
+	Product, _, errorGetProduct := Product.Get(
+		controller.Client,
+		productUUID,
+	)
+
+	if errorGetProduct != nil {
+
+		fmt.Println("GetManyBookings() ERR: ", errorGetProduct.Error())
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+			},
+		)
+
+		return
+	}
+
+	successResponse := gin.H{
+		"status":  200,
+		"message": SUCCESS_GET_PRODUCT,
+		"data": gin.H{
+			"product": Product,
+		},
+	}
+
+	c.JSON(http.StatusOK, successResponse)
+}
+
 func (controller *ProductController) UpdateProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
