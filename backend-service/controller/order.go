@@ -50,9 +50,9 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 
 			c.JSON(http.StatusInternalServerError,
 				gin.H{
-					"status": 500,
-					"code":   10000,
-					// "message": SERVER_MALFUNCTION_CANNOT_CREATE_PRODUCT,
+					"status":  500,
+					"code":    10000,
+					"message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
 				},
 			)
 
@@ -85,9 +85,9 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_CREATE_PRODUCT,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_CREATE_ORDER,
 			},
 		)
 
@@ -103,9 +103,9 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_INITIALIZE_SMART_CONTRACT,
 			},
 		)
 
@@ -119,9 +119,9 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_STORE_SMART_CONTRACT,
 			},
 		)
 
@@ -135,9 +135,9 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
 			},
 		)
 

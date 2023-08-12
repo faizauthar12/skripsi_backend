@@ -45,9 +45,9 @@ func (controller *CustomerController) CreateCustomer(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_CREATE_PRODUCT,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_CREATE_CUSTOMER,
 			},
 		)
 

@@ -220,7 +220,7 @@ func (controller *UserController) UpdateUser(c *gin.Context) {
 	if len(updateList) == 0 {
 		c.JSON(
 			http.StatusOK,
-			gin.H{"status": 200, "message": "Nothing to update"},
+			gin.H{"status": 200, "message": NOTHING_TO_UPDATE},
 		)
 
 		return

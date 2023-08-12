@@ -85,9 +85,9 @@ func (controller *CartController) CreateCart(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_CREATE_CART_ITEM,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_GET_MANY_CART_ITEM,
 			},
 		)
 
@@ -110,9 +110,9 @@ func (controller *CartController) CreateCart(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
-				"status": 500,
-				"code":   10000,
-				// "message": SERVER_MALFUNCTION_CANNOT_CREATE_CART_ITEM,
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_CREATE_CART,
 			},
 		)
 

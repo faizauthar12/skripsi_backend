@@ -280,7 +280,7 @@ func (controller *ProductController) UpdateProduct(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("errorUpdateService.Error() ", errorUpdateProduct.Error())
+		fmt.Println("errorUpdateProduct: Error() ", errorUpdateProduct.Error())
 
 		errorResponse := gin.H{
 			"status":  500,
