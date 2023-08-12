@@ -31,6 +31,17 @@ const (
 	DATABASE   = "skripsi"
 	COLLECTION = "cart"
 
+	USER_UUID_CANNOT_BLANK        = "User UUID cannot be blank"
+	PRODUCT_UUID_CANNOT_BLANK     = "Product UUID cannot be blank"
+	CART_GRAND_TOTAL_CANNOT_BLANK = "Cart grand total cannot be blank"
+
+	PRODUCT_NOT_FOUND            = "Product not found"
+	CART_UUID_DOES_NOT_MATCH     = "Cart UUID does not match"
+	CUSTOMER_UUID_DOES_NOT_MATCH = "Customer UUID does not match"
+
+	FAILED_CREATE_CART = "Failed to create cart"
+	FAILED_UPDATE_CART = "Failed to update the cart"
+
 	// UpdateCandidate for Cart
 
 	UPDATE_CART_GRAND_TOTAL = 2
@@ -50,11 +61,11 @@ func Create(
 	uuid := uuid.New().String()
 
 	if customerUUID == "" {
-		return Cart{}, errors.New("user uuid cannot be blank")
+		return Cart{}, errors.New(USER_UUID_CANNOT_BLANK)
 	}
 
 	if cartGrandTotal < 0 {
-		return Cart{}, errors.New("cart grand total cannot be blank")
+		return Cart{}, errors.New(CART_GRAND_TOTAL_CANNOT_BLANK)
 	}
 
 	cart := Cart{
@@ -70,7 +81,7 @@ func Create(
 	_, err := coll.InsertOne(context.TODO(), cart)
 
 	if err != nil {
-		return Cart{}, errors.New("error creating cart")
+		return Cart{}, errors.New(FAILED_CREATE_CART)
 	}
 
 	return cart, nil
@@ -142,13 +153,13 @@ func GetManyByCustomerUUID(
 	return carts, nil
 }
 
-func UpdateName(
+func UpdateCartGrandTotal(
 	updateList []UpdateCandidate,
 	newCartGrandTotal int64,
 ) ([]UpdateCandidate, error) {
 
 	if newCartGrandTotal < 0 {
-		return nil, errors.New("cart grand total cannot be blank")
+		return nil, errors.New(CART_GRAND_TOTAL_CANNOT_BLANK)
 	}
 
 	updateList = append(
@@ -170,11 +181,11 @@ func ExecUpdate(
 ) error {
 
 	if cartUUID == "" {
-		return errors.New("product UUID cannot be blank")
+		return errors.New(PRODUCT_UUID_CANNOT_BLANK)
 	}
 
 	if customerUUID == "" {
-		return errors.New("user UUID cannot be blank")
+		return errors.New(USER_UUID_CANNOT_BLANK)
 	}
 
 	updateList = append(
@@ -214,12 +225,12 @@ func ExecUpdate(
 		if errorFindCart != nil {
 			return errorFindCart
 		} else {
-			return errors.New("product not found")
+			return errors.New(PRODUCT_NOT_FOUND)
 		}
 	}
 
 	if cartUUID != cart.CustomerUUID { // Validate product ownership
-		return errors.New("cart uuid does not match")
+		return errors.New(CART_UUID_DOES_NOT_MATCH)
 	}
 
 	var update bson.D
@@ -238,7 +249,7 @@ func ExecUpdate(
 	_, err := coll.UpdateOne(context.TODO(), filterUpdate, update)
 
 	if err != nil {
-		return errors.New("update cart failed")
+		return errors.New(FAILED_UPDATE_CART)
 	}
 
 	return nil
@@ -260,12 +271,12 @@ func Delete(
 		filter).Decode(&findResult)
 
 	if findQueryError != nil {
-		return false, errors.New("product not found")
+		return false, errors.New(PRODUCT_NOT_FOUND)
 	}
 
 	// Validate product ownership
 	if customerUUID != findResult.CustomerUUID {
-		return false, errors.New("uuid does not match")
+		return false, errors.New(CUSTOMER_UUID_DOES_NOT_MATCH)
 	}
 
 	_, errorDelete := coll.DeleteOne(context.TODO(), filter)
