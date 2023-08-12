@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	Order "github.com/faizauthar12/skripsi/order-gomod"
+	Product "github.com/faizauthar12/skripsi/product-gomod"
 )
 
 type CreateOrderHTTPBody struct {
@@ -39,9 +40,37 @@ func (controller *OrderController) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	// Calculate the Product Total Price
+	var cartItems []Order.CartItem
+	for _, item := range createOrderHTTPBody.CartItem {
+		product, _, errorGetProduct := Product.Get(controller.Client, item.ProductUUID)
+
+		if errorGetProduct != nil {
+			fmt.Println("CreateOrder() ERR: ", errorGetProduct.Error())
+
+			c.JSON(http.StatusInternalServerError,
+				gin.H{
+					"status": 500,
+					"code":   10000,
+					// "message": SERVER_MALFUNCTION_CANNOT_CREATE_PRODUCT,
+				},
+			)
+
+			return
+		}
+
+		cartItem := Order.CartItem{
+			ProductUUID:       item.ProductUUID,
+			ProductQuantity:   item.ProductQuantity,
+			ProductTotalPrice: product.ProductPrice * item.ProductQuantity,
+		}
+
+		cartItems = append(cartItems, cartItem)
+	}
+
 	order, errorCreateOrder := Order.Create(
 		controller.Client,
-		createOrderHTTPBody.CartItem,
+		cartItems,
 		createOrderHTTPBody.CartGrandTotal,
 		createOrderHTTPBody.CustomerUUID,
 		createOrderHTTPBody.CustomerName,
