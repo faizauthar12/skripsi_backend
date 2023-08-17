@@ -29,6 +29,7 @@ type Order struct {
 	CustomerEmail       string
 	CustomerAddress     string
 	CustomerPhoneNumber string
+	EthAddress          *types.Transaction
 	Status              string
 }
 
@@ -44,6 +45,7 @@ type IDGenerator struct {
 }
 
 const (
+	MONGO_ERROR                        = "order: MongoError: "
 	CART_ITEM_CANNOT_BLANK             = "cart item cannot be blank"
 	CART_GRAND_TOTAL_CANNOT_BLANK      = "cart grand total cannot be blank"
 	CUSTOMER_UUID_CANNOT_BLANK         = "customer uuid cannot be blank"
@@ -64,8 +66,7 @@ func connect(client *mongo.Client) *mongo.Collection {
 	return client.Database(DATABASE).Collection(COLLECTION)
 }
 
-func Create(
-	client *mongo.Client,
+func New(
 	cartItem []CartItem,
 	cartGrandTotal int64,
 	customerUUID string,
@@ -99,18 +100,7 @@ func Create(
 		return Order{}, errors.New(CUSTOMER_PHONE_NUMBER_CANNOT_BLANK)
 	}
 
-	// Obtain the next available ID from the IDGenerator collection
-	idGenColl := client.Database(DATABASE).Collection("orderID")
-	update := bson.D{{"$inc", bson.D{{"next", 1}}}}
-	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
-	var idDoc IDGenerator
-	errorGenColl := idGenColl.FindOneAndUpdate(context.TODO(), bson.D{}, update, opts).Decode(&idDoc)
-	if errorGenColl != nil {
-		return Order{}, errors.New(ERROR_CREATING_DB)
-	}
-
 	order := Order{
-		ID:                  idDoc.Next,
 		CartItem:            cartItem,
 		CartGrandTotal:      cartGrandTotal,
 		CustomerUUID:        customerUUID,
@@ -118,14 +108,6 @@ func Create(
 		CustomerEmail:       customerEmail,
 		CustomerAddress:     customerAddress,
 		CustomerPhoneNumber: customerPhoneNumber,
-	}
-
-	coll := connect(client)
-
-	_, err := coll.InsertOne(context.TODO(), order)
-
-	if err != nil {
-		return Order{}, errors.New(ERROR_CREATING_DB)
 	}
 
 	return order, nil
@@ -278,6 +260,52 @@ func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.
 
 	fmt.Println("Read: Result: ", result)
 	fmt.Println("Read: retrievedOrder: ", retrivedOrder)
+}
+
+func AddEthAddress(
+	order *Order,
+	ethAddress *types.Transaction,
+) {
+	order.EthAddress = ethAddress
+}
+
+func Create(
+	client *mongo.Client,
+	order *Order,
+) error {
+	coll := connect(client)
+
+	// Obtain the next available ID from the IDGenerator collection
+	idGenColl := client.Database(DATABASE).Collection("orderID")
+	update := bson.D{{"$inc", bson.D{{"next", 1}}}}
+	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
+	var idDoc IDGenerator
+	errorGenColl := idGenColl.FindOneAndUpdate(context.TODO(), bson.D{}, update, opts).Decode(&idDoc)
+	if errorGenColl != nil {
+		return errors.New(ERROR_CREATING_DB)
+	}
+
+	for {
+		order.ID = idDoc.Next
+
+		_, errorCreatingOrder := coll.InsertOne(context.TODO(), order)
+
+		if errorCreatingOrder == nil {
+			return nil
+		}
+
+		if monggoError, ok := errorCreatingOrder.(mongo.WriteException); ok {
+			for _, writeException := range monggoError.WriteErrors {
+				if writeException.Code == 11000 {
+					// Duplicate key error, rerun generateBookingID and try again
+					continue
+				}
+			}
+		}
+
+		// if the error is not duplicate key
+		return errors.New(MONGO_ERROR + errorCreatingOrder.Error())
+	}
 }
 
 func GetMany(
