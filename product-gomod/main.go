@@ -148,7 +148,7 @@ func GetMany(
 
 	coll := connect(client)
 
-	var filter bson.D
+	filter := bson.D{{}}
 	if category != "" {
 		filter = bson.D{{Key: "productcategory", Value: category}}
 	} else {
@@ -184,6 +184,25 @@ func GetMany(
 	}
 
 	return products, nil
+}
+
+func GetCount(
+	client *mongo.Client,
+) (int64, error) {
+
+	coll := connect(client)
+
+	counts, errorGetCount := coll.CountDocuments(context.TODO(), bson.D{})
+
+	if errorGetCount != nil {
+		if errorGetCount == mongo.ErrNilDocument {
+			return 0, nil
+		}
+
+		return 0, errorGetCount
+	}
+
+	return counts, nil
 }
 
 func GetManyByUserName(
