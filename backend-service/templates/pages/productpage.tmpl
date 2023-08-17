@@ -1,0 +1,73 @@
+{{define "productpage.tmpl"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{.title}}</title>
+  </head>
+  <body>
+    {{template "header.tmpl"}}
+
+    <main class="mt-5 flex flex-col mx-10">
+      <h1>Produk :</h1>
+
+      {{if .Products}}
+      <table class="table-fixed">
+        <thead>
+          <tr>
+            <th>UUID</th>
+            <th>Product Name</th>
+            <th>Product Description</th>
+            <th>Product Category</th>
+            <th>Product Price</th>
+            <th>Product Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{
+            range.Products
+          }}
+          <tr>
+            <td>{{.UUID}}</td>
+            <td>
+              {{.ProductName}}
+            </td>
+            <td>{{.ProductDescription}}</td>
+            <td>{{.ProductCategory}}</td>
+            <td>{{.ProductPrice}}</td>
+            <td>{{.ProductStock}}</td>
+          </tr>
+          {{
+            end
+          }}
+        </tbody>
+      </table>
+      {{else}}
+      <p>There's nothing to see here... yet!</p>
+      {{ end }}
+
+      <div class="flex justify-between">
+        {{if gt .pages 1}}
+        <a href="{{.previousPage}}">
+          <button>Previous Page</button>
+        </a>
+        {{else}}
+        <div></div>
+        {{ end }}
+
+        {{if lt .pages .maxPages}}
+        <a href="{{.nextPage}}">
+          <button>Next Page</button>
+        </a>
+        {{else}}
+        <div></div>
+        {{ end }}
+      </div>
+    </main>
+
+    {{template "footer.tmpl"}}
+  </body>
+</html>
+{{ end }}

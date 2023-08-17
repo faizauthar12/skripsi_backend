@@ -19,6 +19,8 @@ func (app *application) routes() *gin.Engine {
 
 	route.Use(cors.Default())
 
+	route.LoadHTMLGlob("./templates/*/*.tmpl")
+
 	userRoutes := route.Group("/user")
 	{
 		userRoutes.POST("/", app.user.CreateUser)
@@ -48,6 +50,14 @@ func (app *application) routes() *gin.Engine {
 	orderRoutes := route.Group("/order")
 	{
 		orderRoutes.POST("/", app.order.CreateOrder)
+	}
+
+	adminRoutes := route.Group("/admin")
+	{
+		adminRoutes.GET("/", app.admin.HomePage)
+		adminRoutes.GET("/product", app.admin.ProductPage)
+		adminRoutes.GET("/order", app.admin.OrderPage)
+		adminRoutes.GET("/customer", app.admin.CustomerPage)
 	}
 
 	return route

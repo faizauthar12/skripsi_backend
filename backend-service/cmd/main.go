@@ -23,6 +23,7 @@ type application struct {
 	customer *controller.CustomerController
 	cart     *controller.CartController
 	order    *controller.OrderController
+	admin    *controller.AdminController
 }
 
 func connect() *mongo.Client {
@@ -73,6 +74,7 @@ func main() {
 			ClientEth:     clientEth,
 			EthPrivateKey: ethPrivateKet,
 		},
+		admin: &controller.AdminController{Client: client},
 	}
 
 	route := app.routes()

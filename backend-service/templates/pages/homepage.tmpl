@@ -1,0 +1,38 @@
+{{define "homepage.tmpl"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{.title}}</title>
+  </head>
+  <body>
+    {{template "header.tmpl"}}
+
+    <main class="mt-5">
+      <h1>Welcome to page admin, this is just a demo</h1>
+      <h1>Penting untuk hari ini :</h1>
+
+      <div class="layout flex flex-col">
+        <div class="flex-start flex gap-1">
+          <a class="hover:text-gray-600" href="/admin/product">Produk:</a>
+          <div>{{.ProdukTotal}}</div>
+        </div>
+
+        <div class="flex-start flex gap-1">
+          <a class="hover:text-gray-600" href="/admin/customer">Customer: </a>
+          <div>{{.CustomerTotal}}</div>
+        </div>
+
+        <div class="flex-start flex gap-1">
+          <a class="hover:text-gray-600" href="/admin/order">Order: </a>
+          <div>{{.OrderTotal}}</div>
+        </div>
+      </div>
+    </main>
+
+    {{template "footer.tmpl"}}
+  </body>
+</html>
+{{ end }}
