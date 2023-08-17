@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	token "github.com/faizauthar12/skripsi/backend-service/utils"
+	"github.com/faizauthar12/skripsi/backend-service/utils"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +32,7 @@ type UpdateProductHTTPBody struct {
 
 func (controller *Controller) CreateProduct(c *gin.Context) {
 
-	user, errorExtractToken := token.ExtractToken(c)
+	user, errorExtractToken := utils.ExtractToken(c)
 
 	if errorExtractToken != nil {
 		c.JSON(http.StatusUnauthorized,
@@ -180,7 +180,7 @@ func (controller *Controller) UpdateProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
-	user, _ := token.ExtractToken(c)
+	user, _ := utils.ExtractToken(c)
 
 	var updateProductHTTPBody UpdateProductHTTPBody
 	errorBodyRequest := c.BindJSON(&updateProductHTTPBody)
@@ -300,7 +300,7 @@ func (controller *Controller) DeleteProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
-	user, errorExtractToken := token.ExtractToken(c)
+	user, errorExtractToken := utils.ExtractToken(c)
 
 	if errorExtractToken != nil {
 		c.JSON(http.StatusUnauthorized,

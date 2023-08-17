@@ -2,34 +2,15 @@ package controller
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 
+	"github.com/faizauthar12/skripsi/backend-service/utils"
 	Customer "github.com/faizauthar12/skripsi/customer-gomod"
 	Order "github.com/faizauthar12/skripsi/order-gomod"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
 	"github.com/gin-gonic/gin"
 )
-
-func HandlePagination(pages int64, pageLink string, itemCount int64) (int64, string, string) {
-	var maxPages int64
-
-	if itemCount > 10 {
-		maxPages = int64(math.Ceil(float64(itemCount) / 10))
-	} else {
-		maxPages = 1
-	}
-
-	var previousPageLink string
-
-	nextPageLink := fmt.Sprintf("/admin/%s?pages=%d", pageLink, pages+1)
-	if pages > 0 {
-		previousPageLink = fmt.Sprintf("/admin/%s?pages=%d", pageLink, pages-1)
-	}
-
-	return maxPages, previousPageLink, nextPageLink
-}
 
 func (controller *Controller) HomePage(c *gin.Context) {
 
@@ -97,7 +78,7 @@ func (controller *Controller) ProductPage(c *gin.Context) {
 		fmt.Println("Admin: Product: Error(): ", errorGetProducts)
 	}
 
-	maxPages, previousPageLink, nextPageLink := HandlePagination(pages, "product", productCount)
+	maxPages, previousPageLink, nextPageLink := utils.HandleAdminPagination(pages, "product", productCount)
 
 	c.HTML(http.StatusOK, "productpage.tmpl", gin.H{
 		"title":        "Product Page",
@@ -139,7 +120,7 @@ func (controller *Controller) OrderPage(c *gin.Context) {
 		fmt.Println("Admin: Order: Error(): ", errorGetOrders)
 	}
 
-	maxPages, previousPageLink, nextPageLink := HandlePagination(pages, "order", orderCount)
+	maxPages, previousPageLink, nextPageLink := utils.HandleAdminPagination(pages, "order", orderCount)
 
 	c.HTML(http.StatusOK, "orderpage.tmpl", gin.H{
 		"title":        "Order Page",
@@ -181,7 +162,7 @@ func (controller *Controller) CustomerPage(c *gin.Context) {
 		fmt.Println("Admin: Customers: Error(): ", errorGetCustomers)
 	}
 
-	maxPages, previousPageLink, nextPageLink := HandlePagination(pages, "customer", customerCount)
+	maxPages, previousPageLink, nextPageLink := utils.HandleAdminPagination(pages, "customer", customerCount)
 
 	c.HTML(http.StatusOK, "customerpage.tmpl", gin.H{
 		"title":        "Customer Page",
