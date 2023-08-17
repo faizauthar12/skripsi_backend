@@ -60,8 +60,7 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 		cartItems = append(cartItems, cartItem)
 	}
 
-	order, errorCreateOrder := Order.Create(
-		controller.ClientMongo,
+	order, errorNewOrder := Order.New(
 		cartItems,
 		createOrderHTTPBody.CartGrandTotal,
 		createOrderHTTPBody.CustomerUUID,
@@ -71,9 +70,9 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 		createOrderHTTPBody.CustomerPhoneNumber,
 	)
 
-	if errorCreateOrder != nil {
+	if errorNewOrder != nil {
 
-		fmt.Println("CreateOrder() ERR: ", errorCreateOrder.Error())
+		fmt.Println("NewOrder() ERR: ", errorNewOrder.Error())
 
 		c.JSON(http.StatusInternalServerError,
 			gin.H{
@@ -130,6 +129,23 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 				"status":  500,
 				"code":    10000,
 				"message": SERVER_MALFUNCTION_CANNOT_GET_PRODUCT,
+			},
+		)
+
+		return
+	}
+
+	Order.AddEthAddress(&order, tx)
+
+	errorCreateOrder := Order.Create(controller.ClientMongo, &order)
+	if errorCreateOrder != nil {
+		fmt.Println("CreateOrder() ERR: ", errorNewOrder.Error())
+
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_CREATE_ORDER,
 			},
 		)
 
