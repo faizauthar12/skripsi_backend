@@ -1,5 +1,10 @@
 package controller
 
+import (
+	"github.com/ethereum/go-ethereum/ethclient"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
 const (
 	DEFAULT_NUM_ITEMS int64 = 10
 	DEFAULT_PAGES     int64 = 1
@@ -38,3 +43,9 @@ const (
 
 	USER_NOT_FOUND = "email or password not found"
 )
+
+type Controller struct {
+	Client        *mongo.Client
+	ClientEth     *ethclient.Client
+	EthPrivateKey string
+}

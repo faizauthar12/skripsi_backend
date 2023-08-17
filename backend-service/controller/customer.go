@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	Customer "github.com/faizauthar12/skripsi/customer-gomod"
 )
@@ -17,11 +16,7 @@ type CreateCustomerHTTPBody struct {
 	CustomerPhoneNumber string `json:"phonenumber"`
 }
 
-type CustomerController struct {
-	Client *mongo.Client
-}
-
-func (controller *CustomerController) CreateCustomer(c *gin.Context) {
+func (controller *Controller) CreateCustomer(c *gin.Context) {
 
 	var createCustomerHTTPBody CreateCustomerHTTPBody
 	errorBodyRequest := c.BindJSON(&createCustomerHTTPBody)

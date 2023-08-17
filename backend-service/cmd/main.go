@@ -18,12 +18,7 @@ const (
 )
 
 type application struct {
-	user     *controller.UserController
-	product  *controller.ProductController
-	customer *controller.CustomerController
-	cart     *controller.CartController
-	order    *controller.OrderController
-	admin    *controller.AdminController
+	controller *controller.Controller
 }
 
 func connect() *mongo.Client {
@@ -65,16 +60,11 @@ func main() {
 	ethPrivateKet := os.Getenv("ETH_PRIVATE_KEY")
 
 	app := application{
-		user:     &controller.UserController{Client: client},
-		product:  &controller.ProductController{Client: client},
-		customer: &controller.CustomerController{Client: client},
-		cart:     &controller.CartController{Client: client},
-		order: &controller.OrderController{
+		controller: &controller.Controller{
 			Client:        client,
 			ClientEth:     clientEth,
 			EthPrivateKey: ethPrivateKet,
 		},
-		admin: &controller.AdminController{Client: client},
 	}
 
 	route := app.routes()

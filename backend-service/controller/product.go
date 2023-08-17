@@ -8,7 +8,6 @@ import (
 	token "github.com/faizauthar12/skripsi/backend-service/utils"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CreateProductHTTPBody struct {
@@ -31,11 +30,7 @@ type UpdateProductHTTPBody struct {
 	ProductStock       int64  `json:"stock"`
 }
 
-type ProductController struct {
-	Client *mongo.Client
-}
-
-func (controller *ProductController) CreateProduct(c *gin.Context) {
+func (controller *Controller) CreateProduct(c *gin.Context) {
 
 	user, errorExtractToken := token.ExtractToken(c)
 
@@ -98,7 +93,7 @@ func (controller *ProductController) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *ProductController) GetMany(c *gin.Context) {
+func (controller *Controller) GetManyProduct(c *gin.Context) {
 
 	// UserName := c.Query("userName")
 	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
@@ -147,7 +142,7 @@ func (controller *ProductController) GetMany(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *ProductController) Get(c *gin.Context) {
+func (controller *Controller) GetProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
@@ -181,7 +176,7 @@ func (controller *ProductController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *ProductController) UpdateProduct(c *gin.Context) {
+func (controller *Controller) UpdateProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
@@ -301,7 +296,7 @@ func (controller *ProductController) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *ProductController) DeleteProduct(c *gin.Context) {
+func (controller *Controller) DeleteProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 

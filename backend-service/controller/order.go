@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	Order "github.com/faizauthar12/skripsi/order-gomod"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
@@ -23,13 +21,7 @@ type CreateOrderHTTPBody struct {
 	Status              string
 }
 
-type OrderController struct {
-	Client        *mongo.Client
-	ClientEth     *ethclient.Client
-	EthPrivateKey string
-}
-
-func (controller *OrderController) CreateOrder(c *gin.Context) {
+func (controller *Controller) CreateOrder(c *gin.Context) {
 
 	var createOrderHTTPBody CreateOrderHTTPBody
 	errorBodyRequest := c.BindJSON(&createOrderHTTPBody)

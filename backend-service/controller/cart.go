@@ -8,7 +8,6 @@ import (
 	CartItem "github.com/faizauthar12/skripsi/cart-item-gomod"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CreateCartHTTPBody struct {
@@ -17,11 +16,7 @@ type CreateCartHTTPBody struct {
 	ProductQuantity int64  `json:"productquantity" binding:"required"`
 }
 
-type CartController struct {
-	Client *mongo.Client
-}
-
-func (controller *CartController) CreateCart(c *gin.Context) {
+func (controller *Controller) CreateCart(c *gin.Context) {
 
 	var createCartHTTPBody CreateCartHTTPBody
 	errorBodyRequest := c.BindJSON(&createCartHTTPBody)

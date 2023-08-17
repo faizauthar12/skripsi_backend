@@ -23,41 +23,41 @@ func (app *application) routes() *gin.Engine {
 
 	userRoutes := route.Group("/user")
 	{
-		userRoutes.POST("/", app.user.CreateUser)
-		userRoutes.PATCH("/", app.user.UpdateUser)
-		userRoutes.POST("/login", app.user.LoginUser)
+		userRoutes.POST("/", app.controller.CreateUser)
+		userRoutes.PATCH("/", app.controller.UpdateUser)
+		userRoutes.POST("/login", app.controller.LoginUser)
 	}
 
 	productRoutes := route.Group("/product")
 	{
-		productRoutes.GET("/", app.product.GetMany)
-		productRoutes.GET("/:productUUID", app.product.Get)
-		productRoutes.POST("/", app.product.CreateProduct)
-		productRoutes.PATCH("/:productUUID", app.product.UpdateProduct)
-		productRoutes.DELETE("/:productUUID", app.product.DeleteProduct)
+		productRoutes.GET("/", app.controller.GetManyProduct)
+		productRoutes.GET("/:productUUID", app.controller.GetProduct)
+		productRoutes.POST("/", app.controller.CreateProduct)
+		productRoutes.PATCH("/:productUUID", app.controller.UpdateProduct)
+		productRoutes.DELETE("/:productUUID", app.controller.DeleteProduct)
 	}
 
 	customerRoutes := route.Group("/customer")
 	{
-		customerRoutes.POST("/", app.customer.CreateCustomer)
+		customerRoutes.POST("/", app.controller.CreateCustomer)
 	}
 
 	cartRoutes := route.Group("/cart")
 	{
-		cartRoutes.POST("/", app.cart.CreateCart)
+		cartRoutes.POST("/", app.controller.CreateCart)
 	}
 
 	orderRoutes := route.Group("/order")
 	{
-		orderRoutes.POST("/", app.order.CreateOrder)
+		orderRoutes.POST("/", app.controller.CreateOrder)
 	}
 
 	adminRoutes := route.Group("/admin")
 	{
-		adminRoutes.GET("/", app.admin.HomePage)
-		adminRoutes.GET("/product", app.admin.ProductPage)
-		adminRoutes.GET("/order", app.admin.OrderPage)
-		adminRoutes.GET("/customer", app.admin.CustomerPage)
+		adminRoutes.GET("/", app.controller.HomePage)
+		adminRoutes.GET("/product", app.controller.ProductPage)
+		adminRoutes.GET("/order", app.controller.OrderPage)
+		adminRoutes.GET("/customer", app.controller.CustomerPage)
 	}
 
 	return route

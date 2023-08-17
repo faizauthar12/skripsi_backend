@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	User "github.com/faizauthar12/skripsi/user-gomod"
 )
@@ -27,11 +26,7 @@ type UpdateUserHTTPBody struct {
 	Password string `json:"password"`
 }
 
-type UserController struct {
-	Client *mongo.Client
-}
-
-func (controller *UserController) CreateUser(c *gin.Context) {
+func (controller *Controller) CreateUser(c *gin.Context) {
 
 	var createUserHTTPBody CreateUserHTTPBody
 	errorBodyRequest := c.BindJSON(&createUserHTTPBody)
@@ -102,7 +97,7 @@ func (controller *UserController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *UserController) LoginUser(c *gin.Context) {
+func (controller *Controller) LoginUser(c *gin.Context) {
 
 	var loginUserBodyRequest LoginUserHTTPbody
 	errorBodyRequest := c.BindJSON(&loginUserBodyRequest)
@@ -171,7 +166,7 @@ func (controller *UserController) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, successResponse)
 }
 
-func (controller *UserController) UpdateUser(c *gin.Context) {
+func (controller *Controller) UpdateUser(c *gin.Context) {
 
 	client := controller.Client
 

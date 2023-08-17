@@ -10,12 +10,7 @@ import (
 	Order "github.com/faizauthar12/skripsi/order-gomod"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type AdminController struct {
-	Client *mongo.Client
-}
 
 func HandlePagination(pages int64, pageLink string, itemCount int64) (int64, string, string) {
 	var maxPages int64
@@ -36,7 +31,7 @@ func HandlePagination(pages int64, pageLink string, itemCount int64) (int64, str
 	return maxPages, previousPageLink, nextPageLink
 }
 
-func (controller *AdminController) HomePage(c *gin.Context) {
+func (controller *Controller) HomePage(c *gin.Context) {
 
 	productCount, errorGetProductCount := Product.GetCount(
 		controller.Client,
@@ -70,7 +65,7 @@ func (controller *AdminController) HomePage(c *gin.Context) {
 	})
 }
 
-func (controller *AdminController) ProductPage(c *gin.Context) {
+func (controller *Controller) ProductPage(c *gin.Context) {
 	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
 	pages, errorParsingPages := strconv.ParseInt(c.Query("pages"), 10, 64)
 	category := c.Query("category")
@@ -114,7 +109,7 @@ func (controller *AdminController) ProductPage(c *gin.Context) {
 	})
 }
 
-func (controller *AdminController) OrderPage(c *gin.Context) {
+func (controller *Controller) OrderPage(c *gin.Context) {
 	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
 	pages, errorParsingPages := strconv.ParseInt(c.Query("pages"), 10, 64)
 
@@ -156,7 +151,7 @@ func (controller *AdminController) OrderPage(c *gin.Context) {
 	})
 }
 
-func (controller *AdminController) CustomerPage(c *gin.Context) {
+func (controller *Controller) CustomerPage(c *gin.Context) {
 	numItems, errorParsingNumItems := strconv.ParseInt(c.Query("numItems"), 10, 64)
 	pages, errorParsingPages := strconv.ParseInt(c.Query("pages"), 10, 64)
 
