@@ -28,7 +28,7 @@ func (controller *Controller) CreateCart(c *gin.Context) {
 	}
 
 	product, _, errorGetProduct := Product.Get(
-		controller.Client,
+		controller.ClientMongo,
 		createCartHTTPBody.ProductUUID,
 	)
 
@@ -47,7 +47,7 @@ func (controller *Controller) CreateCart(c *gin.Context) {
 	}
 
 	cartItem, errorCreateCartItem := CartItem.Create(
-		controller.Client,
+		controller.ClientMongo,
 		createCartHTTPBody.CustomerUUID,
 		product.UUID,
 		product.ProductPrice,
@@ -69,7 +69,7 @@ func (controller *Controller) CreateCart(c *gin.Context) {
 	}
 
 	cartItemMany, errorGetCartItemMany := CartItem.GetManyByCustomerUUID(
-		controller.Client,
+		controller.ClientMongo,
 		cartItem.CustomerUUID,
 		10000,
 		1,
@@ -95,7 +95,7 @@ func (controller *Controller) CreateCart(c *gin.Context) {
 	}
 
 	cart, errorCreateCart := Cart.Create(
-		controller.Client,
+		controller.ClientMongo,
 		createCartHTTPBody.CustomerUUID,
 		cartGrandTotal,
 	)

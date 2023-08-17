@@ -21,7 +21,7 @@ type application struct {
 	controller *controller.Controller
 }
 
-func connect() *mongo.Client {
+func connectMongo() *mongo.Client {
 	const URI = "mongodb://localhost:27017/?maxPoolSize=20&w=majority"
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, errConnect := mongo.Connect(ctx, options.Client().ApplyURI(URI))
@@ -54,14 +54,14 @@ func main() {
 		panic(errorLoadEnv)
 	}
 
-	client := connect()
+	clientMongo := connectMongo()
 	clientEth := connectEth()
 
 	ethPrivateKet := os.Getenv("ETH_PRIVATE_KEY")
 
 	app := application{
 		controller: &controller.Controller{
-			Client:        client,
+			ClientMongo:   clientMongo,
 			ClientEth:     clientEth,
 			EthPrivateKey: ethPrivateKet,
 		},

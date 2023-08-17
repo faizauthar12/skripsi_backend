@@ -37,7 +37,7 @@ func (controller *Controller) CreateUser(c *gin.Context) {
 		return
 	}
 
-	client := controller.Client
+	client := controller.ClientMongo
 
 	userUUID, errorCreateUser := User.Create(
 		client,
@@ -108,7 +108,7 @@ func (controller *Controller) LoginUser(c *gin.Context) {
 		return
 	}
 
-	client := controller.Client
+	client := controller.ClientMongo
 
 	logedUser, isAuthenticated := User.NativeAuthenticate(
 		client,
@@ -168,7 +168,7 @@ func (controller *Controller) LoginUser(c *gin.Context) {
 
 func (controller *Controller) UpdateUser(c *gin.Context) {
 
-	client := controller.Client
+	client := controller.ClientMongo
 
 	var updateUserBodyRequest UpdateUserHTTPBody
 	errorBodyRequest := c.BindJSON(&updateUserBodyRequest)

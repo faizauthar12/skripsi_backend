@@ -28,7 +28,7 @@ func (controller *Controller) CreateCustomer(c *gin.Context) {
 	}
 
 	customer, errorCreateCustomer := Customer.Create(
-		controller.Client,
+		controller.ClientMongo,
 		createCustomerHTTPBody.CustomerName,
 		createCustomerHTTPBody.CustomerEmail,
 		createCustomerHTTPBody.CustomerAddress,

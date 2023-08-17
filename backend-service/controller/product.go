@@ -58,7 +58,7 @@ func (controller *Controller) CreateProduct(c *gin.Context) {
 	}
 
 	product, errorCreateProduct := Product.Create(
-		controller.Client,
+		controller.ClientMongo,
 		user.UUID,
 		user.Name,
 		createProductHTTPBody.ProductName,
@@ -109,7 +109,7 @@ func (controller *Controller) GetManyProduct(c *gin.Context) {
 	}
 
 	Products, errorGetProducts := Product.GetMany(
-		controller.Client,
+		controller.ClientMongo,
 		category,
 		numItems,
 		pages,
@@ -147,7 +147,7 @@ func (controller *Controller) GetProduct(c *gin.Context) {
 	productUUID := c.Param("productUUID")
 
 	Product, _, errorGetProduct := Product.Get(
-		controller.Client,
+		controller.ClientMongo,
 		productUUID,
 	)
 
@@ -229,7 +229,7 @@ func (controller *Controller) UpdateProduct(c *gin.Context) {
 	}
 
 	errorUpdateProduct := Product.ExecUpdate(
-		controller.Client,
+		controller.ClientMongo,
 		updateList,
 		user.UUID,
 		productUUID,
@@ -317,7 +317,7 @@ func (controller *Controller) DeleteProduct(c *gin.Context) {
 	}
 
 	_, errorDeleteProduct := Product.Delete(
-		controller.Client,
+		controller.ClientMongo,
 		user.UUID,
 		productUUID,
 	)

@@ -35,7 +35,7 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 	// Calculate the Product Total Price
 	var cartItems []Order.CartItem
 	for _, item := range createOrderHTTPBody.CartItem {
-		product, _, errorGetProduct := Product.Get(controller.Client, item.ProductUUID)
+		product, _, errorGetProduct := Product.Get(controller.ClientMongo, item.ProductUUID)
 
 		if errorGetProduct != nil {
 			fmt.Println("CreateOrder() ERR: ", errorGetProduct.Error())
@@ -61,7 +61,7 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 	}
 
 	order, errorCreateOrder := Order.Create(
-		controller.Client,
+		controller.ClientMongo,
 		cartItems,
 		createOrderHTTPBody.CartGrandTotal,
 		createOrderHTTPBody.CustomerUUID,

@@ -15,7 +15,7 @@ import (
 func (controller *Controller) HomePage(c *gin.Context) {
 
 	productCount, errorGetProductCount := Product.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetProductCount != nil {
@@ -23,7 +23,7 @@ func (controller *Controller) HomePage(c *gin.Context) {
 	}
 
 	customerCount, errorGetCustomerCount := Customer.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetCustomerCount != nil {
@@ -31,7 +31,7 @@ func (controller *Controller) HomePage(c *gin.Context) {
 	}
 
 	orderCount, errorGetOrderCount := Order.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetOrderCount != nil {
@@ -60,7 +60,7 @@ func (controller *Controller) ProductPage(c *gin.Context) {
 	}
 
 	productCount, errorGetProductCount := Product.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetProductCount != nil {
@@ -68,7 +68,7 @@ func (controller *Controller) ProductPage(c *gin.Context) {
 	}
 
 	products, errorGetProducts := Product.GetMany(
-		controller.Client,
+		controller.ClientMongo,
 		category,
 		numItems,
 		pages,
@@ -103,7 +103,7 @@ func (controller *Controller) OrderPage(c *gin.Context) {
 	}
 
 	orderCount, errorGetOrderCount := Order.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetOrderCount != nil {
@@ -111,7 +111,7 @@ func (controller *Controller) OrderPage(c *gin.Context) {
 	}
 
 	orders, errorGetOrders := Order.GetMany(
-		controller.Client,
+		controller.ClientMongo,
 		numItems,
 		pages,
 	)
@@ -145,7 +145,7 @@ func (controller *Controller) CustomerPage(c *gin.Context) {
 	}
 
 	customerCount, errorGetCustomerCount := Customer.GetCount(
-		controller.Client,
+		controller.ClientMongo,
 	)
 
 	if errorGetCustomerCount != nil {
@@ -153,7 +153,7 @@ func (controller *Controller) CustomerPage(c *gin.Context) {
 	}
 
 	customers, errorGetCustomers := Customer.GetMany(
-		controller.Client,
+		controller.ClientMongo,
 		numItems,
 		pages,
 	)

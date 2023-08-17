@@ -45,7 +45,7 @@ const (
 )
 
 type Controller struct {
-	Client        *mongo.Client
+	ClientMongo   *mongo.Client
 	ClientEth     *ethclient.Client
 	EthPrivateKey string
 }
