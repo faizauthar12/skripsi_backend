@@ -122,11 +122,12 @@ func GetMany(
 
 	coll := connect(client)
 
-	// filter := bson.D{{Key: "username", Value: userName}}
+	filter := bson.D{{}}
 	opts := options.Find().SetLimit(numItems).SetSkip((pages - 1) * numItems)
 
 	cursor, errorFindQuery := coll.Find(
 		context.TODO(),
+		filter,
 		opts,
 	)
 
@@ -152,6 +153,25 @@ func GetMany(
 	}
 
 	return customers, nil
+}
+
+func GetCount(
+	client *mongo.Client,
+) (int64, error) {
+
+	coll := connect(client)
+
+	counts, errorGetCount := coll.CountDocuments(context.TODO(), bson.D{})
+
+	if errorGetCount != nil {
+		if errorGetCount == mongo.ErrNilDocument {
+			return 0, nil
+		}
+
+		return 0, errorGetCount
+	}
+
+	return counts, nil
 }
 
 func UpdateName(
