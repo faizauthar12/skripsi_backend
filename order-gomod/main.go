@@ -8,7 +8,6 @@ import (
 	"log"
 	"math/big"
 	"strconv"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -19,7 +18,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Order struct {
@@ -282,21 +280,81 @@ func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.
 	fmt.Println("Read: retrievedOrder: ", retrivedOrder)
 }
 
-func connectMongo() *mongo.Client {
-	const URI = "mongodb://localhost:27017/?maxPoolSize=20&w=majority"
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, errConnect := mongo.Connect(ctx, options.Client().ApplyURI(URI))
+func GetMany(
+	client *mongo.Client,
+	numItems int64,
+	pages int64,
+) ([]Order, error) {
 
-	if errConnect != nil {
-		panic(errConnect)
+	coll := connect(client)
+
+	filter := bson.D{{}}
+	opts := options.Find().SetLimit(numItems).SetSkip((pages - 1) * numItems)
+
+	cursor, errorFindQuery := coll.Find(
+		context.TODO(),
+		filter,
+		opts,
+	)
+
+	if errorFindQuery != nil {
+		if errorFindQuery == mongo.ErrNoDocuments {
+			return []Order{}, nil
+		}
+
+		return []Order{}, errorFindQuery
 	}
 
-	if errPing := client.Ping(ctx, readpref.Primary()); errPing != nil {
-		panic(errPing)
+	defer cursor.Close(context.TODO())
+
+	// Iterate over the result set and decode the documents into []customer
+	var orders []Order
+	for cursor.Next(context.TODO()) {
+		var order Order
+		errorDecode := cursor.Decode(&order)
+		if errorDecode != nil {
+			return nil, errorDecode
+		}
+		orders = append(orders, order)
 	}
 
-	return client
+	return orders, nil
 }
+
+func GetCount(
+	client *mongo.Client,
+) (int64, error) {
+
+	coll := connect(client)
+
+	counts, errorGetCount := coll.CountDocuments(context.TODO(), bson.D{})
+
+	if errorGetCount != nil {
+		if errorGetCount == mongo.ErrNilDocument {
+			return 0, nil
+		}
+
+		return 0, errorGetCount
+	}
+
+	return counts, nil
+}
+
+// func connectMongo() *mongo.Client {
+// 	const URI = "mongodb://localhost:27017/?maxPoolSize=20&w=majority"
+// 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+// 	client, errConnect := mongo.Connect(ctx, options.Client().ApplyURI(URI))
+
+// 	if errConnect != nil {
+// 		panic(errConnect)
+// 	}
+
+// 	if errPing := client.Ping(ctx, readpref.Primary()); errPing != nil {
+// 		panic(errPing)
+// 	}
+
+// 	return client
+// }
 
 // func main() {
 
