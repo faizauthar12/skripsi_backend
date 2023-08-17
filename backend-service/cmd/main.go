@@ -57,13 +57,13 @@ func main() {
 	clientMongo := connectMongo()
 	clientEth := connectEth()
 
-	ethPrivateKet := os.Getenv("ETH_PRIVATE_KEY")
+	ethPrivateKey := os.Getenv("ETH_PRIVATE_KEY")
 
 	app := application{
 		controller: &controller.Controller{
 			ClientMongo:   clientMongo,
 			ClientEth:     clientEth,
-			EthPrivateKey: ethPrivateKet,
+			EthPrivateKey: ethPrivateKey,
 		},
 	}
 
