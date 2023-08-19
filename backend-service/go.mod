@@ -1,6 +1,6 @@
 module github.com/faizauthar12/skripsi/backend-service
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/ethereum/go-ethereum v1.12.2
@@ -24,6 +24,7 @@ require (
 	github.com/dchest/uniuri v1.2.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
+	github.com/faizauthar12/skripsi/email-gomod v0.0.0-00010101000000-000000000000 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -77,3 +78,5 @@ replace (
 	github.com/faizauthar12/skripsi/product-gomod => ../product-gomod
 	github.com/faizauthar12/skripsi/user-gomod => ../user-gomod
 )
+
+replace github.com/faizauthar12/skripsi/email-gomod => ../email-gomod
