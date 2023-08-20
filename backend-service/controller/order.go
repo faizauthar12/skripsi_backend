@@ -21,6 +21,33 @@ type CreateOrderHTTPBody struct {
 	Status              string
 }
 
+type DurianPayOrderHTTPBody struct {
+	amount                  string
+	currency                string
+	is_payment_link         bool
+	is_live                 bool
+	is_notification_enabled bool
+	sandbox_options         struct {
+		force_fail bool
+		delay_ms   int64
+	}
+	customer struct {
+		email          string
+		mobile         string
+		given_name     string
+		address_line_1 string
+		city           string
+		region         string
+		postal_code    string
+	}
+	items []struct {
+		name  string
+		qty   int64
+		price string
+		logo  string
+	}
+}
+
 func (controller *Controller) CreateOrder(c *gin.Context) {
 
 	var createOrderHTTPBody CreateOrderHTTPBody
@@ -156,8 +183,9 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 		"status":  200,
 		"message": SUCCESS_CREATE_PRODUCT,
 		"data": gin.H{
-			"order":           order,
-			"eth_transaction": tx,
+			"order":            order,
+			"eth_transaction":  tx,
+			"payment_link_url": "asdasd",
 		},
 	}
 
