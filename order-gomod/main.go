@@ -1,12 +1,16 @@
 package order
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"math/big"
+	"net/http"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -35,13 +39,56 @@ type Order struct {
 
 type CartItem struct {
 	ProductUUID       string
+	ProductName       string
+	ProductPic        string
 	ProductQuantity   int64
+	ProductPrice      int64
 	ProductTotalPrice int64
 }
 
 type IDGenerator struct {
 	ID   string `bson:"_id"`
 	Next int64  `bson:"next"`
+}
+
+type DurianPayOrderItems struct {
+	Name  string `json:"name"`
+	Qty   int64  `json:"qty"`
+	Price string `json:"price"`
+	Logo  string `json:"logo"`
+}
+
+type DurianPayOrderCustomer struct {
+	Email        string `json:"email"`
+	Mobile       string `json:"mobile"`
+	GivenName    string `json:"given_name"`
+	AddressLine1 string `json:"address_line_1"`
+	City         string `json:"city"`
+	Region       string `json:"region"`
+	PostalCode   string `json:"postal_code"`
+}
+
+type DurianPayOrderSandboxOptions struct {
+	ForceFail bool  `json:"force_fail"`
+	Delay     int64 `json:"delay_ms"`
+}
+
+type DurianPayOrder struct {
+	Amount                string                       `json:"amount"`
+	Currency              string                       `json:"currency"`
+	IsPaymentLink         bool                         `json:"is_payment_link"`
+	IsLive                bool                         `json:"is_live"`
+	IsNotificationEnabled bool                         `json:"is_notification_enabled"`
+	SandboxOptions        DurianPayOrderSandboxOptions `json:"sandbox_options"`
+	Customer              DurianPayOrderCustomer       `json:"customer"`
+	Items                 []DurianPayOrderItems        `json:"items"`
+}
+
+type DurianPayorderResponseData struct {
+	PaymentLinkURL string `json:"payment_link_url"`
+}
+type DurianPayOrderResponseBody struct {
+	Data DurianPayorderResponseData `json:"data"`
 }
 
 const (
@@ -213,7 +260,7 @@ func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts
 
 	tx, errorStoringData := orderContract.SetOrder(
 		auth,
-		string(order.ID),
+		fmt.Sprint(order.ID),
 		productUUID,
 		productQuantity,
 		productTotalPrice,
@@ -366,6 +413,86 @@ func GetCount(
 	}
 
 	return counts, nil
+}
+
+func NewPaymentDurianPay(order Order) DurianPayOrder {
+
+	durian := DurianPayOrder{
+		Amount:                strconv.FormatInt(order.CartGrandTotal, 10),
+		Currency:              "IDR",
+		IsPaymentLink:         true,
+		IsLive:                false,
+		IsNotificationEnabled: true,
+		SandboxOptions: DurianPayOrderSandboxOptions{
+			ForceFail: false,
+			Delay:     1,
+		},
+		Customer: DurianPayOrderCustomer{
+			Email:        order.CustomerEmail,
+			Mobile:       order.CustomerPhoneNumber,
+			GivenName:    order.CustomerName,
+			AddressLine1: order.CustomerAddress,
+		},
+	}
+
+	return durian
+}
+
+func AddItemsDurianPay(durianPayOrder *DurianPayOrder, order *Order) {
+
+	var items []DurianPayOrderItems
+	for _, cartItem := range order.CartItem {
+		item := DurianPayOrderItems{
+			Name:  cartItem.ProductName,
+			Qty:   cartItem.ProductQuantity,
+			Price: strconv.FormatInt(cartItem.ProductPrice, 10),
+			Logo:  cartItem.ProductPic,
+		}
+
+		items = append(items, item)
+	}
+
+	durianPayOrder.Items = items
+}
+
+func CreatePaymentDurianPay(durianPayOrder DurianPayOrder, DurianPayServerKey string) (string, error) {
+
+	client := &http.Client{}
+
+	jsonBody, errorJsonBody := json.Marshal(durianPayOrder)
+	if errorJsonBody != nil {
+		fmt.Println("Error converting to json: ", errorJsonBody)
+		return "", errorJsonBody
+	}
+
+	bodyBuffer := bytes.NewBuffer(jsonBody)
+
+	request, errorRequest := http.NewRequest("POST", "https://api.durianpay.id/v1/orders", bodyBuffer)
+	if errorRequest != nil {
+		fmt.Println("Error Creating request: ", errorRequest)
+		return "", nil
+	}
+
+	// Set the Authorization header with the basic auth
+	request.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(DurianPayServerKey+":")))
+	request.Header.Set("Content-Type", "application/json")
+
+	response, errorDoRequest := client.Do(request)
+
+	if response.StatusCode != http.StatusCreated {
+		fmt.Println("Response DurianPayment: ", response.Body)
+		return "", errorDoRequest
+	}
+
+	var durianPayOrderResponseBody DurianPayOrderResponseBody
+
+	errorDecodeJson := json.NewDecoder(response.Body).Decode(&durianPayOrderResponseBody)
+	if errorDecodeJson != nil {
+		fmt.Println("Error decoding response: ", errorDecodeJson)
+		return "", nil
+	}
+
+	return fmt.Sprintf("https://links.durianpay.id/payment/%s", durianPayOrderResponseBody.Data.PaymentLinkURL), nil
 }
 
 // func connectMongo() *mongo.Client {
