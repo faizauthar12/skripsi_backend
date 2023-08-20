@@ -48,6 +48,10 @@ type DurianPayOrderHTTPBody struct {
 	}
 }
 
+type DurianPayOrderResponseBody struct {
+	payment_link_url string
+}
+
 func (controller *Controller) CreateOrder(c *gin.Context) {
 
 	var createOrderHTTPBody CreateOrderHTTPBody
