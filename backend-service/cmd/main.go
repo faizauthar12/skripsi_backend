@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/faizauthar12/skripsi/backend-service/controller"
+	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -60,12 +61,15 @@ func main() {
 	ethPrivateKey := os.Getenv("ETH_PRIVATE_KEY")
 	durianPayAuth := os.Getenv("DURIANPAY_AUTH")
 
+	formDecoder := form.NewDecoder()
+
 	app := application{
 		controller: &controller.Controller{
 			ClientMongo:   clientMongo,
 			ClientEth:     clientEth,
 			EthPrivateKey: ethPrivateKey,
 			DurianPayAuth: durianPayAuth,
+			FormDecoder:   formDecoder,
 		},
 	}
 

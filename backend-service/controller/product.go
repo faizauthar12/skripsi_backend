@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/faizauthar12/skripsi/backend-service/utils"
 	Product "github.com/faizauthar12/skripsi/product-gomod"
@@ -63,7 +64,7 @@ func (controller *Controller) CreateProduct(c *gin.Context) {
 		user.Name,
 		createProductHTTPBody.ProductName,
 		createProductHTTPBody.ProductDescription,
-		createProductHTTPBody.ProductCategory,
+		strings.ToLower(createProductHTTPBody.ProductCategory),
 		createProductHTTPBody.ProductPrice,
 		createProductHTTPBody.ProductStock,
 	)

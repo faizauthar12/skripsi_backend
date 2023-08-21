@@ -173,3 +173,42 @@ func (controller *Controller) CustomerPage(c *gin.Context) {
 		"previousPage": previousPageLink,
 	})
 }
+
+func (controller *Controller) ProductPageCreate(c *gin.Context) {
+	c.HTML(http.StatusOK, "productpagecreate.tmpl", nil)
+}
+
+func (controller *Controller) ProductPageCreatePost(c *gin.Context) {
+	name := c.PostForm("name")
+	description := c.PostForm("description")
+	category := c.PostForm("category")
+	priceStr := c.PostForm("price")
+	stockStr := c.PostForm("stock")
+
+	// Convert price and stock to int64
+	price, _ := strconv.ParseInt(priceStr, 10, 64)
+	stock, _ := strconv.ParseInt(stockStr, 10, 64)
+
+	// Get userUUID and userName (you might need to fetch this from the session or authentication)
+	userUUID := "user-uuid"
+	userName := "user-name"
+
+	// Create the product
+	_, err := Product.Create(
+		controller.ClientMongo,
+		userUUID,
+		userName,
+		name,
+		description,
+		category,
+		price,
+		stock,
+	)
+
+	if err != nil {
+		// Handle error (e.g., show an error message)
+	}
+
+	// Redirect to the product page or show a success message
+	c.Redirect(http.StatusSeeOther, "/admin/product") // Adjust the URL as needed
+}

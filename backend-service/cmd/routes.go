@@ -56,6 +56,8 @@ func (app *application) routes() *gin.Engine {
 	{
 		adminRoutes.GET("/", app.controller.HomePage)
 		adminRoutes.GET("/product", app.controller.ProductPage)
+		adminRoutes.GET("/product/create", app.controller.ProductPageCreate)
+		adminRoutes.POST("/product/create", app.controller.ProductPageCreatePost)
 		adminRoutes.GET("/order", app.controller.OrderPage)
 		adminRoutes.GET("/customer", app.controller.CustomerPage)
 	}

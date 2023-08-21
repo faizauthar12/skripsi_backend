@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/go-playground/form/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -50,4 +51,5 @@ type Controller struct {
 	ClientEth     *ethclient.Client
 	EthPrivateKey string
 	DurianPayAuth string
+	FormDecoder   *form.Decoder
 }

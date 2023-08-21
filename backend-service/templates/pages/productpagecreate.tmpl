@@ -1,0 +1,82 @@
+{{define "productpagecreate.tmpl"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{.title}}</title>
+  </head>
+  <body>
+    {{template "header.tmpl"}}
+
+    <main class="mt-5 flex flex-col mx-10">
+      <h1>Produk Baru</h1>
+
+      <form
+        class="flex flex-col mt-5 gap-3"
+        action="/admin/product/create"
+        method="POST"
+      >
+        <div class="flex-row gap-1">
+          <label for="name">Product Name:</label>
+          <input
+            class="border border-gray-600 rounded-lg"
+            type="text"
+            id="name"
+            name="name"
+            required
+          />
+        </div>
+
+        <div class="flex-row gap-1">
+          <label for="description">Product Description:</label>
+          <textarea
+            class="border border-gray-600 rounded-lg"
+            id="description"
+            name="description"
+            required
+          ></textarea>
+        </div>
+
+        <div class="flex-row gap-1">
+          <label for="category">Product Category:</label>
+          <input
+            class="border border-gray-600 rounded-lg"
+            type="text"
+            id="category"
+            name="category"
+            required
+          />
+        </div>
+
+        <div class="flex-row gap-1">
+          <label for="price">Product Price:</label>
+          <input
+            class="border border-gray-600 rounded-lg"
+            type="number"
+            id="price"
+            name="price"
+            required
+          />
+        </div>
+
+        <div class="flex-row gap-1">
+          <label for="stock">Product Stock:</label>
+          <input
+            class="border border-gray-600 rounded-lg"
+            type="number"
+            id="stock"
+            name="stock"
+            required
+          />
+        </div>
+
+        <input class="flex" type="submit" value="Create Product" />
+      </form>
+    </main>
+
+    {{template "footer.tmpl"}}
+  </body>
+</html>
+{{ end }}
