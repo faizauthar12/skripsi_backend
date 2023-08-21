@@ -58,12 +58,14 @@ func main() {
 	clientEth := connectEth()
 
 	ethPrivateKey := os.Getenv("ETH_PRIVATE_KEY")
+	durianPayAuth := os.Getenv("DURIANPAY_AUTH")
 
 	app := application{
 		controller: &controller.Controller{
 			ClientMongo:   clientMongo,
 			ClientEth:     clientEth,
 			EthPrivateKey: ethPrivateKey,
+			DurianPayAuth: durianPayAuth,
 		},
 	}
 

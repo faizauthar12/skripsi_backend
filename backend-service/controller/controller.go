@@ -24,6 +24,7 @@ const (
 	SERVER_MALFUNCTION_CANNOT_GET_MANY_CART_ITEM        = "Server malfunction, cannot get many cart item"
 	SERVER_MALFUNCTION_CANNOT_CREATE_CART               = "Server malfunction, cannot create cart"
 	SERVER_MALFUNCTION_CANNOT_CREATE_ORDER              = "Server malfunction, cannot create order"
+	SERVER_MALFUNCTION_CANNOT_CREATE_PAYMENT            = "Server malfunction, cannot create durian pay payment"
 
 	UNAUTHORIZED = "Unauthorized"
 
@@ -48,4 +49,5 @@ type Controller struct {
 	ClientMongo   *mongo.Client
 	ClientEth     *ethclient.Client
 	EthPrivateKey string
+	DurianPayAuth string
 }

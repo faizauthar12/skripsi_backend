@@ -21,37 +21,6 @@ type CreateOrderHTTPBody struct {
 	Status              string
 }
 
-type DurianPayOrderHTTPBody struct {
-	amount                  string
-	currency                string
-	is_payment_link         bool
-	is_live                 bool
-	is_notification_enabled bool
-	sandbox_options         struct {
-		force_fail bool
-		delay_ms   int64
-	}
-	customer struct {
-		email          string
-		mobile         string
-		given_name     string
-		address_line_1 string
-		city           string
-		region         string
-		postal_code    string
-	}
-	items []struct {
-		name  string
-		qty   int64
-		price string
-		logo  string
-	}
-}
-
-type DurianPayOrderResponseBody struct {
-	payment_link_url string
-}
-
 func (controller *Controller) CreateOrder(c *gin.Context) {
 
 	var createOrderHTTPBody CreateOrderHTTPBody
@@ -84,6 +53,9 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 
 		cartItem := Order.CartItem{
 			ProductUUID:       item.ProductUUID,
+			ProductName:       item.ProductName,
+			ProductPic:        item.ProductPic,
+			ProductPrice:      product.ProductPrice,
 			ProductQuantity:   item.ProductQuantity,
 			ProductTotalPrice: product.ProductPrice * item.ProductQuantity,
 		}
@@ -183,15 +155,36 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	durianPayOrder := Order.NewPaymentDurianPay(order)
+
+	Order.AddItemsDurianPay(&durianPayOrder, &order)
+
+	DurianPaymentLink, errorCreatePaymentLink := Order.CreatePaymentDurianPay(durianPayOrder, controller.DurianPayAuth)
+	if errorCreatePaymentLink != nil {
+		fmt.Println("CreateOrder() ERR: ", errorCreatePaymentLink.Error())
+
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_CREATE_PAYMENT,
+			},
+		)
+
+		return
+	}
+
 	successResponse := gin.H{
 		"status":  200,
 		"message": SUCCESS_CREATE_PRODUCT,
 		"data": gin.H{
 			"order":            order,
 			"eth_transaction":  tx,
-			"payment_link_url": "asdasd",
+			"payment_link_url": DurianPaymentLink,
 		},
 	}
+
+	fmt.Println(successResponse)
 
 	c.JSON(http.StatusOK, successResponse)
 }

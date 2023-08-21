@@ -17,7 +17,10 @@ type CartItem struct {
 	UUID              string
 	CustomerUUID      string
 	ProductUUID       string
+	ProductName       string
+	ProductPic        string
 	ProductQuantity   int64
+	ProductPrice      int64
 	ProductTotalPrice int64
 	CreatedAt         int64
 	UpdatedAt         int64
