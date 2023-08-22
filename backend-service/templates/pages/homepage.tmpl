@@ -8,26 +8,50 @@
     <title>{{.title}}</title>
   </head>
   <body>
-    {{template "header.tmpl"}}
+    <!-- {{template "header.tmpl"}} -->
 
-    <main class="mt-5">
-      <h1>Welcome to page admin, this is just a demo</h1>
-      <h1>Penting untuk hari ini :</h1>
+    <main class="mt-5 mx-10">
+      <div class="layout relative flex min-h-screen flex-col">
+        <div class="flex flex-row">
+          <div
+            class="me-10 flex min-w-fit flex-col space-y-5 md:me-20 lg:me-40"
+          >
+            <a href="/admin" class="font-bold hover:text-gray-600">
+              Dashboard Admin
+            </a>
 
-      <div class="layout flex flex-col">
-        <div class="flex-start flex gap-1">
-          <a class="hover:text-gray-600" href="/admin/product">Produk:</a>
-          <div>{{.ProdukTotal}}</div>
-        </div>
+            <div class="flex flex-row justify-between">
+              <a href="/admin/product" class="hover:text-gray-600">Produk </a>
+              <div class="rounded-full bg-blue-500 px-2 py-1 text-white">
+                {{ .ProdukTotal }}
+              </div>
+            </div>
 
-        <div class="flex-start flex gap-1">
-          <a class="hover:text-gray-600" href="/admin/customer">Customer: </a>
-          <div>{{.CustomerTotal}}</div>
-        </div>
+            <div class="flex flex-row justify-between">
+              <a href="/admin/customer" class="hover:text-gray-600"
+                >Customer
+              </a>
+              <div class="rounded-full bg-blue-500 px-2 py-1 text-white">
+                {{ .CustomerTotal }}
+              </div>
+            </div>
 
-        <div class="flex-start flex gap-1">
-          <a class="hover:text-gray-600" href="/admin/order">Order: </a>
-          <div>{{.OrderTotal}}</div>
+            <div class="flex flex-row justify-between">
+              <a href="/admin/customer" class="hover:text-gray-600">Order </a>
+              <div class="rounded-full bg-blue-500 px-2 py-1 text-white">
+                {{ .OrderTotal }}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="font-bold"></div>
+            <div
+              class="mt-[27px] grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3"
+            >
+              <div></div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
