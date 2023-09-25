@@ -20,6 +20,7 @@ const (
 	SERVER_MALFUNCTION_CANNOT_GET_PRODUCT               = "Server malfunction, cannot get product"
 	SERVER_MALFUNCTION_CANNOT_CREATE_CART_ITEM          = "Server malfunction, cannot create cart item"
 	SERVER_MALFUNCTION_CANNOT_STORE_SMART_CONTRACT      = "Server malfunction, cannot store smart contract"
+	SERVER_MALFUNCTION_CANNOT_GET_SMART_CONTRACT        = "Server malfunction, cannot get smart contract"
 	SERVER_MALFUNCTION_CANNOT_INITIALIZE_SMART_CONTRACT = "Server malfunction, cannot initialize smart contract"
 	SERVER_MALFUNCTION_CANNOT_CREATE_CUSTOMER           = "Server malfunction, cannot create customer"
 	SERVER_MALFUNCTION_CANNOT_GET_MANY_CART_ITEM        = "Server malfunction, cannot get many cart item"

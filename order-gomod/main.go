@@ -281,7 +281,7 @@ func StoreDataToEth(order Order, orderContract *api.Api, auth *bind.TransactOpts
 
 }
 
-func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.TransactOpts, orderUUID string) {
+func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.TransactOpts, orderUUID string) (Order, error) {
 
 	fmt.Println("Read: From: ", auth.From)
 	fmt.Println("Read: Nonce: ", auth.Nonce)
@@ -289,7 +289,8 @@ func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.
 	result, errorResult := orderContract.GetOrder(&bind.CallOpts{}, orderUUID)
 
 	if errorResult != nil {
-		panic(errorResult)
+		// panic(errorResult)
+		return Order{}, errorResult
 	}
 
 	id, _ := strconv.ParseInt(result.OrderID, 10, 64)
@@ -307,6 +308,8 @@ func ReadDataFromEth(address common.Address, orderContract *api.Api, auth *bind.
 
 	fmt.Println("Read: Result: ", result)
 	fmt.Println("Read: retrievedOrder: ", retrivedOrder)
+
+	return retrivedOrder, nil
 }
 
 func AddEthAddress(

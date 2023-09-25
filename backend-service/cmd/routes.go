@@ -50,6 +50,7 @@ func (app *application) routes() *gin.Engine {
 	orderRoutes := route.Group("/order")
 	{
 		orderRoutes.POST("/", app.controller.CreateOrder)
+		orderRoutes.POST("/decode", app.controller.DecodeEthHash)
 	}
 
 	adminRoutes := route.Group("/admin")

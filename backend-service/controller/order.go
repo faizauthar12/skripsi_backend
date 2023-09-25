@@ -21,6 +21,10 @@ type CreateOrderHTTPBody struct {
 	Status              string
 }
 
+type DecodeEthHashHTTPBody struct {
+	OrderUUID string
+}
+
 func (controller *Controller) CreateOrder(c *gin.Context) {
 
 	var createOrderHTTPBody CreateOrderHTTPBody
@@ -185,6 +189,70 @@ func (controller *Controller) CreateOrder(c *gin.Context) {
 	}
 
 	fmt.Println(successResponse)
+
+	c.JSON(http.StatusOK, successResponse)
+}
+
+func (controller *Controller) DecodeEthHash(c *gin.Context) {
+
+	var decodeEthHashHTTPBody DecodeEthHashHTTPBody
+
+	auth := Order.GetAccountAuth(controller.ClientEth, controller.EthPrivateKey)
+
+	address, errorGetAddress := Order.DeployApi(auth, controller.ClientEth)
+	if errorGetAddress != nil {
+
+		fmt.Println("CreateOrder(): DeployApi(): ERR: ", errorGetAddress.Error())
+
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_INITIALIZE_SMART_CONTRACT,
+			},
+		)
+
+		return
+	}
+
+	orderContract, errorConnectEth := Order.NewApi(address, controller.ClientEth)
+	if errorConnectEth != nil {
+
+		fmt.Println("CreateOrder(): NewApi(): ERR: ", errorConnectEth.Error())
+
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_STORE_SMART_CONTRACT,
+			},
+		)
+
+		return
+	}
+
+	orders, errorReadData := Order.ReadDataFromEth(address, orderContract, auth, decodeEthHashHTTPBody.OrderUUID)
+	if errorReadData != nil {
+		fmt.Println("CreateOrder(): NewApi(): ERR: ", errorReadData.Error())
+
+		c.JSON(http.StatusInternalServerError,
+			gin.H{
+				"status":  500,
+				"code":    10000,
+				"message": SERVER_MALFUNCTION_CANNOT_GET_SMART_CONTRACT,
+			},
+		)
+
+		return
+	}
+
+	successResponse := gin.H{
+		"status":  200,
+		"message": SUCCESS_CREATE_PRODUCT,
+		"data": gin.H{
+			"orders": orders,
+		},
+	}
 
 	c.JSON(http.StatusOK, successResponse)
 }
