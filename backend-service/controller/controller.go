@@ -33,6 +33,7 @@ const (
 	SUCCESS_CREATE_USER     = "Successfully create user"
 	SUCCESS_LOGIN_USER      = "Successfully logged in"
 	SUCCESS_UPDATE_USER     = "Successfully update user"
+	SUCCESS_ENABLE_MERCHANT = "Successfully enable merchant"
 	SUCCESS_CREATE_PRODUCT  = "Successfully create product"
 	SUCCESS_UPDATE_PRODUCT  = "Successfully update the product"
 	SUCCESS_DELETE_SERVICE  = "Successfully delete the product"

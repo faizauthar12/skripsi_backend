@@ -24,6 +24,9 @@ type User struct {
 	Email        string
 	PasswordHash string
 	PasswordSalt string
+	Address      string
+	PhoneNumber  string
+	HaveMerchant bool
 	CreatedAt    int64
 	UpdatedAt    int64
 }
@@ -49,7 +52,10 @@ const (
 	USERNAME_CANNOT_BLANK     = "User: Username cannot be blank"
 	EMAIL_CANNOT_BLANK        = "User: Email cannot be blank"
 	PASSWORD_CANNOT_BLANK     = "User: Password cannot be blank"
+	ADDRESS_CANNOT_BLANK      = "User: Address cannot be blank"
+	PHONE_NUMBER_CANNOT_BLANK = "User: Phone Number cannot be blank"
 	USER_EMAIL_CANNOT_BLANK   = "User: User email cannot be blank"
+	USER_UUID_CANNOT_BLANK    = "User: User UUID cannot be blank"
 	USER_NOT_FOUND            = "User: User Not found"
 	FAILED_UPDATE_USER        = "User: Failed update user, details : "
 
@@ -57,7 +63,10 @@ const (
 	UPDATE_EMAIL         = 2
 	UPDATE_PASSWORD_HASH = 3
 	UPDATE_PASSWORD_SALT = 4
-	UPDATE_UPDATED_AT    = 5
+	UPDATE_ADDRESS       = 5
+	UPDATE_PHONE_NUMBER  = 6
+	UPDATE_HAVE_MERCHANT = 7
+	UPDATE_UPDATED_AT    = 9
 )
 
 func connect(client *mongo.Client) *mongo.Collection {
@@ -87,6 +96,7 @@ func Create(
 		Email:        email,
 		PasswordHash: hex.EncodeToString(passwordHash),
 		PasswordSalt: salt,
+		HaveMerchant: false,
 		CreatedAt:    time.Now().Unix(),
 		UpdatedAt:    time.Now().Unix(),
 	}
@@ -292,6 +302,46 @@ func UpdateName(
 	return updateList, nil
 }
 
+func UpdateAddress(
+	updateList []UpdateCandidate,
+	newAddress string,
+) ([]UpdateCandidate, error) {
+
+	if newAddress == "" {
+		return nil, errors.New(ADDRESS_CANNOT_BLANK)
+	}
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			user:      User{Address: newAddress},
+			objective: UPDATE_ADDRESS,
+		},
+	)
+
+	return updateList, nil
+}
+
+func UpdatePhoneNumber(
+	updateList []UpdateCandidate,
+	newPhoneNumber string,
+) ([]UpdateCandidate, error) {
+
+	if newPhoneNumber == "" {
+		return nil, errors.New(PHONE_NUMBER_CANNOT_BLANK)
+	}
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			user:      User{PhoneNumber: newPhoneNumber},
+			objective: UPDATE_PHONE_NUMBER,
+		},
+	)
+
+	return updateList, nil
+}
+
 func UpdatePassword(
 	updateList []UpdateCandidate,
 	newPassword string,
@@ -323,16 +373,32 @@ func UpdatePassword(
 	return updateList, nil
 }
 
+func EnableMerchant(
+	client *mongo.Client,
+	updateList []UpdateCandidate,
+) ([]UpdateCandidate, error) {
+
+	updateList = append(
+		updateList,
+		UpdateCandidate{
+			user:      User{HaveMerchant: true},
+			objective: UPDATE_HAVE_MERCHANT,
+		},
+	)
+
+	return updateList, nil
+}
+
 func ExecUpdate(
 	client *mongo.Client,
 	updateList []UpdateCandidate,
-	userEmail string,
+	userUUID string,
 ) error {
 
 	coll := connect(client)
 
-	if userEmail == "" {
-		return errors.New(USER_EMAIL_CANNOT_BLANK)
+	if userUUID == "" {
+		return errors.New(USER_UUID_CANNOT_BLANK)
 	}
 
 	updateList = append(
@@ -362,7 +428,7 @@ func ExecUpdate(
 		}
 	}
 
-	filter := bson.D{{"email", userEmail}}
+	filter := bson.D{{"useruuid", userUUID}}
 	update := bson.D{{"$set", setList}}
 
 	_, errorUpdateUser := coll.UpdateOne(

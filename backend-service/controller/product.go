@@ -49,6 +49,20 @@ func (controller *Controller) CreateProduct(c *gin.Context) {
 		return
 	}
 
+	if !user.HaveMerchant {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
 	var createProductHTTPBody CreateProductHTTPBody
 	errorBodyRequest := c.BindJSON(&createProductHTTPBody)
 
@@ -181,7 +195,35 @@ func (controller *Controller) UpdateProduct(c *gin.Context) {
 
 	productUUID := c.Param("productUUID")
 
-	user, _ := utils.ExtractToken(c)
+	user, errorExtractToken := utils.ExtractToken(c)
+
+	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
+	if !user.HaveMerchant {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
 
 	var updateProductHTTPBody UpdateProductHTTPBody
 	errorBodyRequest := c.BindJSON(&updateProductHTTPBody)
@@ -304,6 +346,20 @@ func (controller *Controller) DeleteProduct(c *gin.Context) {
 	user, errorExtractToken := utils.ExtractToken(c)
 
 	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
+	if !user.HaveMerchant {
 		c.JSON(http.StatusUnauthorized,
 			gin.H{
 				"status":  401,

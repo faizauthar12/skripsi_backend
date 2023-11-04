@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/faizauthar12/skripsi/backend-service/utils"
 	User "github.com/faizauthar12/skripsi/user-gomod"
 )
 
@@ -21,9 +22,11 @@ type LoginUserHTTPbody struct {
 }
 
 type UpdateUserHTTPBody struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	Address     string `json:"address"`
+	PhoneNumber string `json:"phonenumber"`
 }
 
 func (controller *Controller) CreateUser(c *gin.Context) {
@@ -170,6 +173,22 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 
 	client := controller.ClientMongo
 
+	user, errorExtractToken := utils.ExtractToken(c)
+
+	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
 	var updateUserBodyRequest UpdateUserHTTPBody
 	errorBodyRequest := c.BindJSON(&updateUserBodyRequest)
 
@@ -206,10 +225,24 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 		)
 	}
 
+	if updateUserBodyRequest.Address != "" {
+		updateList, _ = User.UpdateAddress(
+			updateList,
+			updateUserBodyRequest.Address,
+		)
+	}
+
+	if updateUserBodyRequest.PhoneNumber != "" {
+		updateList, _ = User.UpdatePhoneNumber(
+			updateList,
+			updateUserBodyRequest.PhoneNumber,
+		)
+	}
+
 	errorUpdateUser := User.ExecUpdate(
 		client,
 		updateList,
-		updateUserBodyRequest.Email,
+		user.UUID,
 	)
 
 	if len(updateList) == 0 {
@@ -222,7 +255,7 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 	}
 
 	if errorUpdateUser != nil {
-		if errorUpdateUser.Error() == User.USER_EMAIL_CANNOT_BLANK {
+		if errorUpdateUser.Error() == User.USER_UUID_CANNOT_BLANK {
 			errorResponse := gin.H{
 				"status":  401,
 				"code":    10006,
@@ -252,6 +285,75 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 	successResponse := gin.H{
 		"status":  200,
 		"message": SUCCESS_UPDATE_USER,
+	}
+
+	c.JSON(http.StatusOK, successResponse)
+}
+
+func (controller *Controller) EnableMerchant(c *gin.Context) {
+
+	client := controller.ClientMongo
+
+	user, errorExtractToken := utils.ExtractToken(c)
+
+	if errorExtractToken != nil {
+		c.JSON(http.StatusUnauthorized,
+			gin.H{
+				"status":  401,
+				"code":    10000, // TODO check code
+				"message": UNAUTHORIZED,
+			},
+		)
+
+		c.Abort()
+
+		return
+	}
+
+	var updateList []User.UpdateCandidate
+
+	updateList, _ = User.EnableMerchant(
+		client,
+		updateList,
+	)
+
+	errorUpdateUser := User.ExecUpdate(
+		client,
+		updateList,
+		user.UUID,
+	)
+
+	if errorUpdateUser != nil {
+		if errorUpdateUser.Error() == User.USER_UUID_CANNOT_BLANK {
+			errorResponse := gin.H{
+				"status":  401,
+				"code":    10006,
+				"message": UNAUTHORIZED,
+			}
+
+			c.JSON(http.StatusUnauthorized,
+				errorResponse,
+			)
+
+			return
+		}
+
+		fmt.Println("errorUpdateUser.Error() ", errorUpdateUser.Error())
+
+		errorResponse := gin.H{
+			"status":  500,
+			"code":    10001,
+			"message": SERVER_MALFUNCTION_CANNOT_UPDATE_USER,
+		}
+
+		c.JSON(http.StatusInternalServerError, errorResponse)
+
+		return
+	}
+
+	successResponse := gin.H{
+		"status":  200,
+		"message": SUCCESS_ENABLE_MERCHANT,
 	}
 
 	c.JSON(http.StatusOK, successResponse)

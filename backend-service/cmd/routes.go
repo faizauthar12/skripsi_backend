@@ -26,6 +26,7 @@ func (app *application) routes() *gin.Engine {
 		userRoutes.POST("/", app.controller.CreateUser)
 		userRoutes.PATCH("/", app.controller.UpdateUser)
 		userRoutes.POST("/login", app.controller.LoginUser)
+		userRoutes.POST("/merchant/enable", app.controller.EnableMerchant)
 	}
 
 	productRoutes := route.Group("/product")
